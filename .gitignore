@@ -1,0 +1,15 @@
+# Folders
+**/.venv*/
+**/IMG*/
+**/VIDS*/
+/.vs/
+FileProtector/x64
+HashingLib/x64
+VideoEncryptorLib/x64
+/x64/
+FileProtector/opencv/build/*
+!FileProtector/opencv/build/
+HashingLib/OpenSSL/*
+!HashingLib/OpenSSL/
+
+*.exe
