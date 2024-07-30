@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<PropertyGroup>
+		<!-- ��������� VC++ Directories -->
+		<IncludePath>$(IncludePath);../HashingLib;../VideoEncryptorLib;opencv\build\install\include;</IncludePath>
+		<LibraryPath>$(LibraryPath);../x64\Release;opencv\build\install\x64\vc17\staticlib;../HashingLib\OpenSSL\lib;</LibraryPath>
+	</PropertyGroup>
+	<ItemDefinitionGroup>
+		<!-- C/C++ -->
+		<ClCompile>
+			<RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+			<!-- Multi-threaded (/MT) -->
+		</ClCompile>
+		<!-- libs -->
+		<Link>
+			<AdditionalDependencies>aded.lib;IlmImfd.lib;ippicvmt.lib;ippiwd.lib;ittnotifyd.lib;libclapackd.lib;libjpeg-turbod.lib;libopenjp2d.lib;libpngd.lib;libprotobufd.lib;libtiffd.lib;libwebpd.lib;opencv_world500d.lib;zlibd.lib;HashingLib.lib;libcrypto.lib;libssl.lib;ws2_32.lib;crypt32.lib;VideoEncryptorLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+		</Link>
+	</ItemDefinitionGroup>
+</Project>

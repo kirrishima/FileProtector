@@ -11,5 +11,6 @@ FileProtector/opencv/build/*
 !FileProtector/opencv/build/
 HashingLib/OpenSSL/*
 !HashingLib/OpenSSL/
-
+fd.py
+sasa.py
 *.exe

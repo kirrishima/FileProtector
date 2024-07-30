@@ -1,0 +1,150 @@
+# FileProtector Project
+
+## Overview
+
+The FileProtector project aims to secure files through encryption and other protective measures. This project relies on several third-party libraries, including OpenCV and OpenSSL, which are compiled from source to create static libraries for use in this project.
+
+## Third-Party Libraries
+
+### OpenCV 5.x
+[OpenCV 5.x Repository](https://github.com/opencv/opencv/tree/5.x)
+
+#### Building from Source
+
+1. **Select the Generator in CMake:**
+   - Choose `Visual Studio 2022` as the generator.
+
+2. **Set the following flags in CMake:**
+   ```cmake
+   WITH_JASPER:BOOL=0
+   BUILD_opencv_world:BOOL=1
+   BUILD_opencv_java_bindings_generator:BOOL=0
+   BUILD_SHARED_LIBS:BOOL=0
+   BUILD_opencv_python_tests:BOOL=0
+   BUILD_TESTS:BOOL=0
+   BUILD_JASPER:BOOL=0
+   BUILD_JAVA:BOOL=0
+   BUILD_opencv_python_bindings_generator:BOOL=0
+   BUILD_WITH_DEBUG_INFO:BOOL=0
+   BUILD_opencv_js_bindings_generator:BOOL=0
+   ```
+
+3. **Build Steps:**
+   - After generating the project, locate `OpenCV.sln` in the specified CMake directory.
+   - Build the `ALL_BUILD` configuration and then `INSTALL`.
+   - The necessary files are located in:
+     - `install/include/opencv2`
+     - `install/x64/vc17/staticlib`
+
+### OpenSSL 3.3.1
+[OpenSSL 3.3.1 Source](https://www.openssl.org/source/)
+
+#### Dependencies
+
+1. [Perl](https://strawberryperl.com/)
+2. [NASM](https://www.nasm.us/)
+3. Microsoft Visual C++ (MSVC) C compiler (included with Visual Studio)
+
+#### Building from Source
+
+1. **Install Dependencies:**
+   - Ensure Perl and NASM are in the PATH and accessible from the command line.
+
+2. **Build Steps:**
+   - Open "x64 Native Tools Command Prompt for VS 2022" as an administrator.
+   - Navigate to the OpenSSL directory (e.g., `openssl-3.3.1\openssl-3.3.1`).
+   - Execute the following commands:
+
+   For Debug version:
+   ```shell
+   perl Configure debug-VC-WIN64A no-shared
+   nmake
+   nmake test
+   nmake install
+   ```
+
+   For Release version:
+   ```shell
+   nmake clean
+   perl Configure VC-WIN64A no-shared
+   nmake
+   nmake test
+   nmake install
+   ```
+
+## Project Structure
+
+The project structure is organized as follows:
+
+```
+FileProtector
+├── FileProtector
+│   ├── console.cpp
+│   ├── console.h
+│   ├── core.cpp
+│   ├── file_operations.cpp
+│   ├── hash_operations.cpp
+│   ├── icon.ico
+│   ├── image_display.cpp
+│   ├── imghider.h
+│   ├── main.cpp
+│   ├── opencv
+│   │   └── build
+│   │       └── install
+│   │           ├── include
+│   │           │   └── ◯ ◯ ◯
+│   │           └── x64
+│   │               └── vc17
+│   │                   └── staticlib
+│   │                       └── ◯ ◯ ◯
+│   ├── Resource.aps
+│   ├── resource.h
+│   ├── Resource.rc
+│   ├── stdafx.h
+│   ├── utils.cpp
+│   ├── x64Debug.props
+│   └── x64Release.props
+├── FileProtector.sln
+├── HashingLib
+│   ├── framework.h
+│   ├── hashing.cpp
+│   ├── hashing.h
+│   ├── OpenSSL
+│   │   ├── include
+│   │   │   └── ◯ ◯ ◯
+│   │   └── lib
+│   │       └── ◯ ◯ ◯
+│   ├── openSSL_x64.props
+│   ├── pch.cpp
+│   └── pch.h
+├── Python encoding conversion
+│   ├── .venv
+│   │   └── ◯ ◯ ◯
+│   └── main.py
+├── README.md
+├── VideoEncryptorLib
+│   ├── framework.h
+│   ├── pch.cpp
+│   ├── pch.h
+│   ├── rcc.cpp
+│   ├── VideoEncryptor.cpp
+│   └── VideoEncryptor.h
+└── x64
+    └── Release
+        ├── FileProtector.exe
+        ├── HashingLib.lib
+        └── VideoEncryptorLib.lib
+```
+
+## Building the Project
+
+To successfully build the project, use the project properties from the `.props` files. Ensure the following settings are applied:
+
+- **FileProtector**: Uses the `x64Debug.props` and `x64Release.props`.
+- **HashingLib**: Uses the `openSSL_x64.props`.
+
+This configuration ensures all necessary static libraries and include files are correctly referenced for a successful build.
+
+## File Encoding
+
+To successfully upload to GitHub, the file encoding has been changed to UTF-8. If characters appear incorrectly after downloading the repository, run `Python encoding conversion\main.py` and select `windows-1251` encoding.
