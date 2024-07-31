@@ -1,4 +1,4 @@
-п»ї#include "stdafx.h"
+#include "stdafx.h"
 #include "imghider.h"
 #include <filesystem>
 #include "VideoEncryptor.h"
@@ -11,16 +11,16 @@ namespace imghider {
 			std::ofstream binaryFile(binaryPath, std::ios::out | std::ios::binary | std::ios::app);
 
 			if (!binaryFile.is_open()) {
-				printColoredMessage("РћС€РёР±РєР°: РЅРµ СѓРґР°Р»РѕСЃСЊ РѕС‚РєСЂС‹С‚СЊ С„Р°Р№Р» " + binaryPath, CONSOLE_RED);
+				printColoredMessage("Ошибка: не удалось открыть файл " + binaryPath, CONSOLE_RED);
 				return false;
 			}
 
-			// Р—Р°РїРёСЃС‹РІР°РµРј РґР»РёРЅСѓ РЅР°Р·РІР°РЅРёСЏ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ Рё СЃР°РјРѕ РЅР°Р·РІР°РЅРёРµ
+			// Записываем длину названия изображения и само название
 			size_t imageNameLength = imageName.size();
 			binaryFile.write(reinterpret_cast<const char*>(&imageNameLength), sizeof(size_t));
 			binaryFile.write(imageName.c_str(), imageNameLength);
 
-			// Р—Р°РїРёСЃС‹РІР°РµРј РјРµС‚Р°РґР°РЅРЅС‹Рµ
+			// Записываем метаданные
 			int rows = image.rows;
 			int cols = image.cols;
 			int type = image.type();
@@ -29,7 +29,7 @@ namespace imghider {
 			binaryFile.write(reinterpret_cast<const char*>(&cols), sizeof(cols));
 			binaryFile.write(reinterpret_cast<const char*>(&type), sizeof(type));
 
-			// РЎР¶РёРјР°РµРј РёР·РѕР±СЂР°Р¶РµРЅРёРµ РІ С„РѕСЂРјР°С‚Рµ PNG Рё Р·Р°РїРёСЃС‹РІР°РµРј
+			// Сжимаем изображение в формате PNG и записываем
 			std::vector<uchar> buffer;
 			std::string extension = imageName.substr(imageName.find_last_of('.'));
 			cv::imencode(extension, image, buffer);
@@ -41,15 +41,15 @@ namespace imghider {
 			return true;
 		}
 		catch (const std::ofstream::failure& e) {
-			printColoredMessage("РћС€РёР±РєР° РїСЂРё СЂР°Р±РѕС‚Рµ СЃ С„Р°Р№Р»РѕРј: " + std::string(e.what()), CONSOLE_RED);
+			printColoredMessage("Ошибка при работе с файлом: " + std::string(e.what()), CONSOLE_RED);
 			return false;
 		}
 		catch (const std::exception& e) {
-			printColoredMessage("РћР±С‰Р°СЏ РѕС€РёР±РєР°: " + std::string(e.what()), CONSOLE_RED);
+			printColoredMessage("Общая ошибка: " + std::string(e.what()), CONSOLE_RED);
 			return false;
 		}
 		catch (...) {
-			printColoredMessage("РќРµРёР·РІРµСЃС‚РЅР°СЏ РѕС€РёР±РєР°.", CONSOLE_RED);
+			printColoredMessage("Неизвестная ошибка.", CONSOLE_RED);
 			return false;
 		}
 	}
@@ -71,11 +71,11 @@ namespace imghider {
 						cv::Mat image = cv::imread(imagePath, cv::IMREAD_UNCHANGED);
 
 						if (image.empty()) {
-							printColoredMessage("РћС€РёР±РєР°: РЅРµ СѓРґР°Р»РѕСЃСЊ Р·Р°РіСЂСѓР·РёС‚СЊ РёР·РѕР±СЂР°Р¶РµРЅРёРµ " + imagePath, CONSOLE_RED);
+							printColoredMessage("Ошибка: не удалось загрузить изображение " + imagePath, CONSOLE_RED);
 							continue;
 						}
 
-						std::string fileHash = safe_hashing::sha256(RCC::encryptFilename((imgRelPath / imageFilename).string(), RCC_Shift));
+						std::string fileHash = safe_hashing::sha256(RCC::encryptFilename((imgRelPath).wstring(), RCC_Shift));
 						if (isNameHashInFile(hashFilePath, fileHash)) {
 							if (resolveDuplicate(directoryPath, binaryPath, imagePath, imageFilename, (imgRelPath).string(), newImageFilename, fileHash, image)) {
 								continue;
@@ -83,33 +83,33 @@ namespace imghider {
 						}
 
 						addNameHashToFile(hashFilePath, fileHash);
-						if (saveImage(binaryPath, RCC::encryptFilename((imgRelPath.parent_path() / newImageFilename).string(), RCC_Shift), image)) {
-							printColoredMessage("Р¤Р°Р№Р» " + imagePath + " СѓСЃРїРµС€РЅРѕ РґРѕР±Р°РІР»РµРЅ РІ " + binaryPath, CONSOLE_GREEN, "");
+						if (saveImage(binaryPath, RCC::encryptFilename((imgRelPath.parent_path() / newImageFilename).wstring(), RCC_Shift), image)) {
+							printColoredMessage("Файл " + imagePath + " успешно добавлен в " + binaryPath, CONSOLE_GREEN, "");
 							if (fs::remove(imagePath)) {
-								printColoredMessage(" Рё СѓРґР°Р»РµРЅ РёР· " + directoryPath + '.', CONSOLE_GREEN);
+								printColoredMessage(" и удален из " + directoryPath + '.', CONSOLE_GREEN);
 							}
 							else {
-								printColoredMessage("\nРћС€РёР±РєР°: РЅРµ СѓРґР°Р»РѕСЃСЊ СѓРґР°Р»РёС‚СЊ С„Р°Р№Р» " + imagePath, CONSOLE_RED);
+								printColoredMessage("\nОшибка: не удалось удалить файл " + imagePath, CONSOLE_RED);
 							}
 						}
 						else {
-							printColoredMessage("РќРµ СѓРґР°Р»РѕСЃСЊ Р·Р°РїРёСЃР°С‚СЊ С„Р°Р№Р» " + imagePath + " РІ " + binaryPath, CONSOLE_RED);
+							printColoredMessage("Не удалось записать файл " + imagePath + " в " + binaryPath, CONSOLE_RED);
 						}
 					}
 					catch (const std::exception& e) {
-						printColoredMessage("РћС€РёР±РєР° РїСЂРё РѕР±СЂР°Р±РѕС‚РєРµ С„Р°Р№Р»Р° " + entry.path().string() + ": " + std::string(e.what()), CONSOLE_RED);
+						printColoredMessage("Ошибка при обработке файла " + entry.path().string() + ": " + std::string(e.what()), CONSOLE_RED);
 					}
 					catch (...) {
-						printColoredMessage("РќРµРёР·РІРµСЃС‚РЅР°СЏ РѕС€РёР±РєР° РїСЂРё РѕР±СЂР°Р±РѕС‚РєРµ С„Р°Р№Р»Р° " + entry.path().string(), CONSOLE_RED);
+						printColoredMessage("Неизвестная ошибка при обработке файла " + entry.path().string(), CONSOLE_RED);
 					}
 				}
 			}
 		}
 		catch (const std::exception& e) {
-			printColoredMessage("РћР±С‰Р°СЏ РѕС€РёР±РєР°: " + std::string(e.what()), CONSOLE_RED);
+			printColoredMessage("Общая ошибка: " + std::string(e.what()), CONSOLE_RED);
 		}
 		catch (...) {
-			printColoredMessage("РќРµРёР·РІРµСЃС‚РЅР°СЏ РѕС€РёР±РєР°.", CONSOLE_RED);
+			printColoredMessage("Неизвестная ошибка.", CONSOLE_RED);
 		}
 	}
 
@@ -117,74 +117,74 @@ namespace imghider {
 		try {
 			std::ifstream binaryFile(binaryPath, std::ios::in | std::ios::binary);
 
-			// РџСЂРѕРІРµСЂСЏРµРј, СѓРґР°Р»РѕСЃСЊ Р»Рё РѕС‚РєСЂС‹С‚СЊ С„Р°Р№Р»
+			// Проверяем, удалось ли открыть файл
 			if (!binaryFile.is_open()) {
-				printColoredMessage("РћС€РёР±РєР°: РЅРµ СѓРґР°Р»РѕСЃСЊ РѕС‚РєСЂС‹С‚СЊ С„Р°Р№Р» " + binaryPath, CONSOLE_RED);
+				printColoredMessage("Ошибка: не удалось открыть файл " + binaryPath, CONSOLE_RED);
 				return std::make_tuple(cv::Mat(), std::string(), -1, false);
 			}
 
-			// РџРµСЂРµРјРµС‰Р°РµРј СѓРєР°Р·Р°С‚РµР»СЊ С‡С‚РµРЅРёСЏ РЅР° Р·Р°РґР°РЅРЅСѓСЋ РЅР°С‡Р°Р»СЊРЅСѓСЋ РїРѕР·РёС†РёСЋ
+			// Перемещаем указатель чтения на заданную начальную позицию
 			binaryFile.seekg(start);
 
-			// Р§РёС‚Р°РµРј РґР»РёРЅСѓ РёРјРµРЅРё С„Р°Р№Р»Р°
+			// Читаем длину имени файла
 			size_t imageNameLength;
 			binaryFile.read(reinterpret_cast<char*>(&imageNameLength), sizeof(size_t));
 
-			// Р§РёС‚Р°РµРј РёРјСЏ С„Р°Р№Р»Р°
+			// Читаем имя файла
 			std::vector<char> imageNameBuffer(imageNameLength);
 			binaryFile.read(imageNameBuffer.data(), imageNameLength);
 
-			// Р”РµРєРѕРґРёСЂСѓРµРј Рё СЂР°СЃС€РёС„СЂРѕРІС‹РІР°РµРј РёРјСЏ С„Р°Р№Р»Р°
+			// Декодируем и расшифровываем имя файла
 			std::string imageName(imageNameBuffer.data(), imageNameLength);
-			imageName = RCC::encryptFilename(imageName, -RCC_Shift);
+			imageName = RCC::encryptFilename(string_to_wstring(imageName), -RCC_Shift);
 
-			// Р§РёС‚Р°РµРј РјРµС‚Р°РґР°РЅРЅС‹Рµ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ
+			// Читаем метаданные изображения
 			int rows, cols, type;
 			binaryFile.read(reinterpret_cast<char*>(&rows), sizeof(int));
 			binaryFile.read(reinterpret_cast<char*>(&cols), sizeof(int));
 			binaryFile.read(reinterpret_cast<char*>(&type), sizeof(int));
 
-			// Р§РёС‚Р°РµРј СЂР°Р·РјРµСЂ Р±СѓС„РµСЂР° Рё РґР°РЅРЅС‹Рµ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ
+			// Читаем размер буфера и данные изображения
 			int imageDataBufferSize;
 			binaryFile.read(reinterpret_cast<char*>(&imageDataBufferSize), sizeof(int));
 			std::vector<uchar> buffer(imageDataBufferSize);
 			binaryFile.read(reinterpret_cast<char*>(buffer.data()), imageDataBufferSize);
 
-			// РџРѕР»СѓС‡Р°РµРј С‚РµРєСѓС‰СѓСЋ РїРѕР·РёС†РёСЋ СѓРєР°Р·Р°С‚РµР»СЏ РІ С„Р°Р№Р»Рµ
+			// Получаем текущую позицию указателя в файле
 			size_t binaryFileTellg = binaryFile.tellg();
 			binaryFile.close();
 
-			// Р”РµРєРѕРґРёСЂСѓРµРј РёР·РѕР±СЂР°Р¶РµРЅРёРµ РёР· Р±СѓС„РµСЂР°
+			// Декодируем изображение из буфера
 			cv::Mat image = cv::imdecode(buffer, cv::IMREAD_UNCHANGED);
 			if (image.empty() || image.rows != rows || image.cols != cols || image.type() != type) {
 				return std::make_tuple(cv::Mat(), std::string(), binaryFileTellg, false);
 			}
 
-			// Р’РѕР·РІСЂР°С‰Р°РµРј Р·Р°РіСЂСѓР¶РµРЅРЅРѕРµ РёР·РѕР±СЂР°Р¶РµРЅРёРµ, РёРјСЏ С„Р°Р№Р»Р°, С‚РµРєСѓС‰СѓСЋ РїРѕР·РёС†РёСЋ РІ С„Р°Р№Р»Рµ Рё С„Р»Р°Рі СѓСЃРїРµС…Р°
+			// Возвращаем загруженное изображение, имя файла, текущую позицию в файле и флаг успеха
 			return std::make_tuple(image, imageName, binaryFileTellg, true);
 		}
 		catch (const std::ifstream::failure& e) {
-			printColoredMessage("РћС€РёР±РєР° РїСЂРё СЂР°Р±РѕС‚Рµ СЃ С„Р°Р№Р»РѕРј: " + std::string(e.what()), CONSOLE_RED);
+			printColoredMessage("Ошибка при работе с файлом: " + std::string(e.what()), CONSOLE_RED);
 			return std::make_tuple(cv::Mat(), std::string(), start, false);
 		}
 		catch (const std::exception& e) {
-			printColoredMessage("РћР±С‰Р°СЏ РѕС€РёР±РєР°: " + std::string(e.what()), CONSOLE_RED);
+			printColoredMessage("Общая ошибка: " + std::string(e.what()), CONSOLE_RED);
 			return std::make_tuple(cv::Mat(), std::string(), start, false);
 		}
 		catch (...) {
-			printColoredMessage("РќРµРёР·РІРµСЃС‚РЅР°СЏ РѕС€РёР±РєР°.", CONSOLE_RED);
+			printColoredMessage("Неизвестная ошибка.", CONSOLE_RED);
 			return std::make_tuple(cv::Mat(), std::string(), start, false);
 		}
 	}
 
 	void loadImagesFromBinary(const std::string& binaryPath, const std::string& outputDirectory) {
 		try {
-			// РџСЂРѕРІРµСЂСЏРµРј Рё СЃРѕР·РґР°РµРј РїСѓС‚Рё, РµСЃР»Рё РЅРµРѕР±С…РѕРґРёРјРѕ
+			// Проверяем и создаем пути, если необходимо
 			checkAndCreatePaths({ {outputDirectory, binaryPath} });
 
 			std::ifstream file(binaryPath, std::ios::binary | std::ios::ate);
 			if (!file.is_open()) {
-				printColoredMessage("РћС€РёР±РєР°: РЅРµ СѓРґР°Р»РѕСЃСЊ РѕС‚РєСЂС‹С‚СЊ С„Р°Р№Р» " + binaryPath, CONSOLE_RED);
+				printColoredMessage("Ошибка: не удалось открыть файл " + binaryPath, CONSOLE_RED);
 				return;
 			}
 
@@ -201,7 +201,7 @@ namespace imghider {
 					bool success = std::get<3>(imageData);
 
 					if (!success) {
-						printColoredMessage("РћС€РёР±РєР° РїСЂРё С‡С‚РµРЅРёРё РёР·РѕР±СЂР°Р¶РµРЅРёСЏ. РџСЂРѕРІРµСЂСЊС‚Рµ РЅР°Р»РёС‡РёРµ С„Р°Р№Р»Р° " + binaryPath + " Рё РїРѕРІС‚РѕСЂРёС‚Рµ РїРѕРїС‹С‚РєСѓ.", CONSOLE_RED);
+						printColoredMessage("Ошибка при чтении изображения. Проверьте наличие файла " + binaryPath + " и повторите попытку.", CONSOLE_RED);
 						return;
 					}
 
@@ -214,18 +214,18 @@ namespace imghider {
 							fs::create_directories(filePathExceptFilename);
 						}
 						catch (const std::exception& e) {
-							printColoredMessage("РќРµ СѓРґР°Р»РѕСЃСЊ СЃРѕР·РґР°С‚СЊ РґРёСЂРµРєС‚РѕСЂРёСЋ " + filePathExceptFilename.string() + " РґР»СЏ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ: " + std::string(e.what()), CONSOLE_RED);
-							// РџРѕРїС‹С‚РєР° Р·Р°РїРёСЃРё РІ Р±Р°Р·РѕРІСѓСЋ РґРёСЂРµРєС‚РѕСЂРёСЋ
+							printColoredMessage("Не удалось создать директорию " + filePathExceptFilename.string() + " для изображения: " + std::string(e.what()), CONSOLE_RED);
+							// Попытка записи в базовую директорию
 							if (!fs::exists(outputDirectory)) {
 								try {
 									fs::create_directories(outputDirectory);
 								}
 								catch (const std::exception& e) {
-									printColoredMessage("РќРµ СѓРґР°Р»РѕСЃСЊ СЃРѕР·РґР°С‚СЊ " + outputDirectory + ": " + e.what(), CONSOLE_RED);
-									return; // РџСЂРµСЂС‹РІР°РµРј РІС‹РїРѕР»РЅРµРЅРёРµ С„СѓРЅРєС†РёРё, РµСЃР»Рё РЅРµ СѓРґР°Р»РѕСЃСЊ СЃРѕР·РґР°С‚СЊ РґРёСЂРµРєС‚РѕСЂРёСЋ
+									printColoredMessage("Не удалось создать " + outputDirectory + ": " + e.what(), CONSOLE_RED);
+									return; // Прерываем выполнение функции, если не удалось создать директорию
 								}
 								catch (...) {
-									printColoredMessage("РќРµРёР·РІРµСЃС‚РЅР°СЏ РѕС€РёР±РєР° РїСЂРё СЃРѕР·РґР°РЅРёРё + outputDirectory", CONSOLE_RED);
+									printColoredMessage("Неизвестная ошибка при создании + outputDirectory", CONSOLE_RED);
 									return;
 								}
 							}
@@ -241,26 +241,26 @@ namespace imghider {
 						}
 					}
 					if (!cv::imwrite(outputPath.string(), image)) {
-						printColoredMessage("РћС€РёР±РєР°: РЅРµ СѓРґР°Р»РѕСЃСЊ РІРѕСЃСЃС‚Р°РЅРѕРІРёС‚СЊ РёР·РѕР±СЂР°Р¶РµРЅРёРµ " + outputPath.string(), CONSOLE_RED);
+						printColoredMessage("Ошибка: не удалось восстановить изображение " + outputPath.string(), CONSOLE_RED);
 					}
 					else {
-						printColoredMessage("Р’РѕСЃСЃС‚Р°РЅРѕРІР»РµРЅ С„Р°Р№Р» " + outputPath.string(), CONSOLE_GREEN);
+						printColoredMessage("Восстановлен файл " + outputPath.string(), CONSOLE_GREEN);
 						start = newStart;
 					}
 				}
 				catch (const std::exception& e) {
-					printColoredMessage("РћС€РёР±РєР° РїСЂРё РѕР±СЂР°Р±РѕС‚РєРµ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ: " + std::string(e.what()), CONSOLE_RED);
+					printColoredMessage("Ошибка при обработке изображения: " + std::string(e.what()), CONSOLE_RED);
 				}
 				catch (...) {
-					printColoredMessage("РќРµРёР·РІРµСЃС‚РЅР°СЏ РѕС€РёР±РєР° РїСЂРё РѕР±СЂР°Р±РѕС‚РєРµ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ.", CONSOLE_RED);
+					printColoredMessage("Неизвестная ошибка при обработке изображения.", CONSOLE_RED);
 				}
 			}
 		}
 		catch (const std::exception& e) {
-			printColoredMessage("РћР±С‰Р°СЏ РѕС€РёР±РєР°: " + std::string(e.what()), CONSOLE_RED);
+			printColoredMessage("Общая ошибка: " + std::string(e.what()), CONSOLE_RED);
 		}
 		catch (...) {
-			printColoredMessage("РќРµРёР·РІРµСЃС‚РЅР°СЏ РѕС€РёР±РєР°.", CONSOLE_RED);
+			printColoredMessage("Неизвестная ошибка.", CONSOLE_RED);
 		}
 	}
 
@@ -269,29 +269,29 @@ namespace imghider {
 		try {
 			if (entry.is_regular_file()) {
 				if (std::filesystem::remove(filePath)) {
-					printColoredMessage("Р¤Р°Р№Р» " + filePath + " СѓСЃРїРµС€РЅРѕ СѓРґР°Р»РµРЅ.", CONSOLE_GREEN);
+					printColoredMessage("Файл " + filePath + " успешно удален.", CONSOLE_GREEN);
 				}
 				else {
-					printColoredMessage("РћС€РёР±РєР°: РЅРµ СѓРґР°Р»РѕСЃСЊ СѓРґР°Р»РёС‚СЊ С„Р°Р№Р» " + filePath, CONSOLE_RED);
+					printColoredMessage("Ошибка: не удалось удалить файл " + filePath, CONSOLE_RED);
 				}
 			}
 			else if (entry.is_directory()) {
 				if (std::filesystem::remove_all(filePath)) {
-					printColoredMessage("РџР°РїРєР° " + filePath + " СѓСЃРїРµС€РЅРѕ СѓРґР°Р»РµРЅР°.", CONSOLE_GREEN);
+					printColoredMessage("Папка " + filePath + " успешно удалена.", CONSOLE_GREEN);
 				}
 				else {
-					printColoredMessage("РћС€РёР±РєР°: РЅРµ СѓРґР°Р»РѕСЃСЊ СѓРґР°Р»РёС‚СЊ РїР°РїРєСѓ " + filePath, CONSOLE_RED);
+					printColoredMessage("Ошибка: не удалось удалить папку " + filePath, CONSOLE_RED);
 				}
 			}
 		}
 		catch (const std::filesystem::filesystem_error& e) {
-			printColoredMessage("РћС€РёР±РєР° С„Р°Р№Р»РѕРІРѕР№ СЃРёСЃС‚РµРјС‹ РїСЂРё СѓРґР°Р»РµРЅРёРё " + filePath + ": " + e.what(), CONSOLE_RED);
+			printColoredMessage("Ошибка файловой системы при удалении " + filePath + ": " + e.what(), CONSOLE_RED);
 		}
 		catch (const std::exception& e) {
-			printColoredMessage("РћР±С‰Р°СЏ РѕС€РёР±РєР° РїСЂРё СѓРґР°Р»РµРЅРёРё " + filePath + ": " + e.what(), CONSOLE_RED);
+			printColoredMessage("Общая ошибка при удалении " + filePath + ": " + e.what(), CONSOLE_RED);
 		}
 		catch (...) {
-			printColoredMessage("РќРµРёР·РІРµСЃС‚РЅР°СЏ РѕС€РёР±РєР° РїСЂРё СѓРґР°Р»РµРЅРёРё " + filePath, CONSOLE_RED);
+			printColoredMessage("Неизвестная ошибка при удалении " + filePath, CONSOLE_RED);
 		}
 	}
 
@@ -310,24 +310,24 @@ namespace imghider {
 					}
 				}
 				catch (const std::filesystem::filesystem_error& e) {
-					printColoredMessage("РћС€РёР±РєР° С„Р°Р№Р»РѕРІРѕР№ СЃРёСЃС‚РµРјС‹ РїСЂРё РѕР±СЂР°Р±РѕС‚РєРµ " + entry.path().string() + ": " + e.what(), CONSOLE_RED);
+					printColoredMessage("Ошибка файловой системы при обработке " + entry.path().string() + ": " + e.what(), CONSOLE_RED);
 				}
 				catch (const std::exception& e) {
-					printColoredMessage("РћР±С‰Р°СЏ РѕС€РёР±РєР° РїСЂРё РѕР±СЂР°Р±РѕС‚РєРµ " + entry.path().string() + ": " + e.what(), CONSOLE_RED);
+					printColoredMessage("Общая ошибка при обработке " + entry.path().string() + ": " + e.what(), CONSOLE_RED);
 				}
 				catch (...) {
-					printColoredMessage("РќРµРёР·РІРµСЃС‚РЅР°СЏ РѕС€РёР±РєР° РїСЂРё РѕР±СЂР°Р±РѕС‚РєРµ " + entry.path().string(), CONSOLE_RED);
+					printColoredMessage("Неизвестная ошибка при обработке " + entry.path().string(), CONSOLE_RED);
 				}
 			}
 		}
 		catch (const std::filesystem::filesystem_error& e) {
-			printColoredMessage("РћС€РёР±РєР° С„Р°Р№Р»РѕРІРѕР№ СЃРёСЃС‚РµРјС‹ РїСЂРё РёС‚РµСЂР°С†РёРё РїРѕ " + directoryPath + ": " + e.what(), CONSOLE_RED);
+			printColoredMessage("Ошибка файловой системы при итерации по " + directoryPath + ": " + e.what(), CONSOLE_RED);
 		}
 		catch (const std::exception& e) {
-			printColoredMessage("РћР±С‰Р°СЏ РѕС€РёР±РєР° РїСЂРё РёС‚РµСЂР°С†РёРё РїРѕ " + directoryPath + ": " + e.what(), CONSOLE_RED);
+			printColoredMessage("Общая ошибка при итерации по " + directoryPath + ": " + e.what(), CONSOLE_RED);
 		}
 		catch (...) {
-			printColoredMessage("РќРµРёР·РІРµСЃС‚РЅР°СЏ РѕС€РёР±РєР° РїСЂРё РёС‚РµСЂР°С†РёРё РїРѕ " + directoryPath, CONSOLE_RED);
+			printColoredMessage("Неизвестная ошибка при итерации по " + directoryPath, CONSOLE_RED);
 		}
 	}
 
@@ -337,64 +337,64 @@ namespace imghider {
 			fs::path fsPath(path);
 
 			try {
-				// РџСЂРѕРІРµСЂСЏРµРј, СЏРІР»СЏРµС‚СЃСЏ Р»Рё РїСѓС‚СЊ С„Р°Р№Р»РѕРј РёР»Рё РґРёСЂРµРєС‚РѕСЂРёРµР№
+				// Проверяем, является ли путь файлом или директорией
 				if (fsPath.has_extension()) {
-					// Р­С‚Рѕ С„Р°Р№Р», СЃРѕР·РґР°РµРј РІСЃРµ СЂРѕРґРёС‚РµР»СЊСЃРєРёРµ РґРёСЂРµРєС‚РѕСЂРёРё
+					// Это файл, создаем все родительские директории
 					fs::path parentPath = fsPath.parent_path();
 					if (!parentPath.empty() && !fs::exists(parentPath)) {
 						fs::create_directories(parentPath);
 					}
-					// РЎРѕР·РґР°РµРј С„Р°Р№Р», РµСЃР»Рё РѕРЅ РЅРµ СЃСѓС‰РµСЃС‚РІСѓРµС‚
+					// Создаем файл, если он не существует
 					if (!fs::exists(fsPath)) {
 						std::ofstream file(fsPath);
 						if (file) {
 							createdAny = true;
 							if (params.verbose) {
-								printColoredMessage("РЎРѕР·РґР°РЅ С„Р°Р№Р»: " + fsPath.string(), CONSOLE_GREEN);
+								printColoredMessage("Создан файл: " + fsPath.string(), CONSOLE_GREEN);
 							}
 						}
 						else {
 							if (params.verbose) {
-								printColoredMessage("РћС€РёР±РєР° СЃРѕР·РґР°РЅРёСЏ С„Р°Р№Р»Р°: " + fsPath.string(), CONSOLE_RED);
+								printColoredMessage("Ошибка создания файла: " + fsPath.string(), CONSOLE_RED);
 							}
 						}
 					}
 					else {
 						if (params.verbose) {
-							printColoredMessage("Р¤Р°Р№Р» СѓР¶Рµ СЃСѓС‰РµСЃС‚РІСѓРµС‚: " + fsPath.string(), CONSOLE_YELLOW);
+							printColoredMessage("Файл уже существует: " + fsPath.string(), CONSOLE_YELLOW);
 						}
 					}
 				}
 				else {
-					// Р­С‚Рѕ РґРёСЂРµРєС‚РѕСЂРёСЏ, СЃРѕР·РґР°РµРј РІСЃРµ РЅРµРѕР±С…РѕРґРёРјС‹Рµ РґРёСЂРµРєС‚РѕСЂРёРё
+					// Это директория, создаем все необходимые директории
 					if (!fs::exists(fsPath)) {
 						if (fs::create_directories(fsPath)) {
 							createdAny = true;
 							if (params.verbose) {
-								printColoredMessage("РЎРѕР·РґР°РЅР° РґРёСЂРµРєС‚РѕСЂРёСЏ " + fsPath.string(), CONSOLE_GREEN);
+								printColoredMessage("Создана директория " + fsPath.string(), CONSOLE_GREEN);
 							}
 						}
 						else {
 							if (params.verbose) {
-								printColoredMessage("РќРµ СѓРґР°Р»РѕСЃСЊ СЃРѕР·РґР°С‚СЊ РґРёСЂРµРєС‚РѕСЂРёСЋ " + fsPath.string(), CONSOLE_RED);
+								printColoredMessage("Не удалось создать директорию " + fsPath.string(), CONSOLE_RED);
 							}
 						}
 					}
 					else {
 						if (params.verbose) {
-							printColoredMessage("Р”РёСЂРµРєС‚РѕСЂРёСЏ " + fsPath.string() + " СѓР¶Рµ СЃСѓС‰РµСЃС‚РІСѓРµС‚", CONSOLE_YELLOW);
+							printColoredMessage("Директория " + fsPath.string() + " уже существует", CONSOLE_YELLOW);
 						}
 					}
 				}
 			}
 			catch (const std::filesystem::filesystem_error& e) {
-				printColoredMessage("РћС€РёР±РєР° С„Р°Р№Р»РѕРІРѕР№ СЃРёСЃС‚РµРјС‹: " + std::string(e.what()), CONSOLE_RED);
+				printColoredMessage("Ошибка файловой системы: " + std::string(e.what()), CONSOLE_RED);
 			}
 			catch (const std::exception& e) {
-				printColoredMessage("РћР±С‰Р°СЏ РѕС€РёР±РєР°: " + std::string(e.what()), CONSOLE_RED);
+				printColoredMessage("Общая ошибка: " + std::string(e.what()), CONSOLE_RED);
 			}
 			catch (...) {
-				printColoredMessage("РќРµРёР·РІРµСЃС‚РЅР°СЏ РѕС€РёР±РєР° РїСЂРё РѕР±СЂР°Р±РѕС‚РєРµ РїСѓС‚Рё: " + fsPath.string(), CONSOLE_RED);
+				printColoredMessage("Неизвестная ошибка при обработке пути: " + fsPath.string(), CONSOLE_RED);
 			}
 		}
 		return createdAny;

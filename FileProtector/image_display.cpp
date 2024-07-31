@@ -1,4 +1,4 @@
-п»ї#include "stdafx.h"
+#include "stdafx.h"
 #include "imghider.h"
 
 namespace imghider {
@@ -18,17 +18,17 @@ namespace imghider {
 		}
 		catch (const cv::Exception& e)
 		{
-			printColoredMessage("РћС€РёР±РєР° OpenCV: " + std::string(e.what()), CONSOLE_RED);
+			printColoredMessage("Ошибка OpenCV: " + std::string(e.what()), CONSOLE_RED);
 			return false;
 		}
 		catch (const std::exception& e)
 		{
-			printColoredMessage("РћР±С‰Р°СЏ РћС€РёР±РєР°: " + std::string(e.what()), CONSOLE_RED);
+			printColoredMessage("Общая Ошибка: " + std::string(e.what()), CONSOLE_RED);
 			return false;
 		}
 		catch (...)
 		{
-			printColoredMessage("РќРµРёР·РІРµСЃС‚РЅР°СЏ РѕС€РёР±РєР°", CONSOLE_RED);
+			printColoredMessage("Неизвестная ошибка", CONSOLE_RED);
 			return false;
 		}
 		return true;
@@ -39,7 +39,7 @@ namespace imghider {
 
 			std::ifstream file(binaryPath, std::ios::binary | std::ios::ate);
 			if (!file.is_open()) {
-				printColoredMessage("РћС€РёР±РєР°: РЅРµ СѓРґР°Р»РѕСЃСЊ РѕС‚РєСЂС‹С‚СЊ С„Р°Р№Р» " + binaryPath, CONSOLE_RED);
+				printColoredMessage("Ошибка: не удалось открыть файл " + binaryPath, CONSOLE_RED);
 				return false;
 			}
 
@@ -57,7 +57,7 @@ namespace imghider {
 					bool success = std::get<3>(imageData);
 
 					if (!success) {
-						printColoredMessage("РћС€РёР±РєР° РїСЂРё С‡С‚РµРЅРёРё РёР·РѕР±СЂР°Р¶РµРЅРёСЏ РёР· \"" + binaryPath + "\".", CONSOLE_RED);
+						printColoredMessage("Ошибка при чтении изображения из \"" + binaryPath + "\".", CONSOLE_RED);
 						return false;
 					}
 					if (imageName == searchFilename) {
@@ -66,25 +66,25 @@ namespace imghider {
 					start = newStart;
 				}
 				catch (const std::exception& e) {
-					printColoredMessage("РћС€РёР±РєР° РїСЂРё Р·Р°РіСЂСѓР·РєРµ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ: " + std::string(e.what()), CONSOLE_RED);
+					printColoredMessage("Ошибка при загрузке изображения: " + std::string(e.what()), CONSOLE_RED);
 					return false;
 				}
 				catch (...) {
-					printColoredMessage("РќРµРёР·РІРµСЃС‚РЅР°СЏ РћС€РёР±РєР° РїСЂРё Р·Р°РіСЂСѓР·РєРµ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ", CONSOLE_RED);
+					printColoredMessage("Неизвестная Ошибка при загрузке изображения", CONSOLE_RED);
 					return false;
 				}
 			}
 		}
 		catch (const std::ifstream::failure& e) {
-			printColoredMessage("РћС€РёР±РєР° РїСЂРё СЂР°Р±РѕС‚Рµ СЃ С„Р°Р№Р»РѕРј: " + std::string(e.what()), CONSOLE_RED);
+			printColoredMessage("Ошибка при работе с файлом: " + std::string(e.what()), CONSOLE_RED);
 			return false;
 		}
 		catch (const std::exception& e) {
-			printColoredMessage("РћР±С‰Р°СЏ РѕС€РёР±РєР°: " + std::string(e.what()), CONSOLE_RED);
+			printColoredMessage("Общая ошибка: " + std::string(e.what()), CONSOLE_RED);
 			return false;
 		}
 		catch (...) {
-			printColoredMessage("РќРµРёР·РІРµСЃС‚РЅР°СЏ РѕС€РёР±РєР°.", CONSOLE_RED);
+			printColoredMessage("Неизвестная ошибка.", CONSOLE_RED);
 			return false;
 		}
 

@@ -1,4 +1,4 @@
-ï»¿#include "pch.h"
+#include "pch.h"
 #include "hashing.h"
 #include "framework.h"
 #include <iostream>
@@ -50,8 +50,9 @@ namespace safe_hashing {
 			return hash;
 		}
 		catch (...) {
-			std::cout << "ÐÐµÐ¸Ð·Ð²ÐµÑÑ‚Ð½Ð°Ñ Ð¾ÑˆÐ¸Ð±ÐºÐ° Ð¿Ñ€Ð¸ Ð²Ñ‹Ñ‡Ð¸ÑÐ»ÐµÐ½Ð¸Ð¸ Ñ…ÑÑˆÐ°" << std::endl;
+			std::cout << "Íåèçâåñòíàÿ îøèáêà ïðè âû÷èñëåíèè õýøà" << std::endl;
 			return "";
 		}
 	}
 }
+

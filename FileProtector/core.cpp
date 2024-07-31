@@ -1,4 +1,4 @@
-﻿#include "imghider.h"
+#include "imghider.h"
 #include "console.h"
 
 

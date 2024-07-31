@@ -1,4 +1,4 @@
-п»ї#define NOMINMAX
+#define NOMINMAX
 #include "stdafx.h"
 #include "imghider.h"
 #include <VideoEncryptor.h>
@@ -23,15 +23,15 @@ const std::string videoEncryptedPath = (std::filesystem::path(videoBaseDirectory
 const std::string videoRecoveredDirectory = (std::filesystem::path(videoBaseDirectory) / VE->getDecryptedFolder()).string();
 
 int ConsoleDefaultHeight = GetConsoleWindowHeight();
-
+#define DISABLE_PSWD
 bool authenticateUser() {
 #ifndef DISABLE_PSWD
-	std::cout << "Р’РІРµРґРёС‚Рµ РїР°СЂРѕР»СЊ: ";
+	std::cout << "Введите пароль: ";
 	std::string pswd;
 	std::getline(std::cin, pswd);
 	if (pswd != "735812") {
 
-		std::cout << "Р”РѕР±СЂРѕ РїРѕР¶Р°Р»РѕРІР°С‚СЊ!\nРўРµРєСѓС‰РёР№ РїР°СЂРѕР»СЊ:\nРЎРїРёСЃРѕРє РїСЂРѕСЃРјРѕС‚СЂР°:\nhttps://open.spotify.com/track/5ucIAerBlXCrES9RNEGNzH?si=30a9324a1cd34b31\n";
+		std::cout << "Добро пожаловать!\nТекущий пароль:\nСписок просмотра:\nhttps://open.spotify.com/track/5ucIAerBlXCrES9RNEGNzH?si=30a9324a1cd34b31\n";
 		system("pause");
 		return false;
 	}
@@ -40,7 +40,7 @@ bool authenticateUser() {
 }
 
 void initializeDirectories(const std::vector<std::string>& paths, bool verbose = false) {
-	printColoredMessage("РЎРѕР·РґР°СЋС‚СЃСЏ РІСЃРµ РЅРµРѕР±С…РѕРґРёРјС‹ РїР°РїРєРё, РµСЃР»Рё РёС… РЅРµС‚. . . \n\n", CONSOLE_GREEN);
+	printColoredMessage("Создаются все необходимы папки, если их нет. . . \n\n", CONSOLE_GREEN);
 	imghider::checkAndCreatePaths({ paths, verbose });
 }
 
@@ -51,7 +51,7 @@ void printHelp();
 
 
 int main() {
-	setlocale(LC_ALL, "Ru");
+	std::setlocale(LC_ALL, "ru_RU");
 
 	ResizeConsole(36, 120, 10000, 120);
 
@@ -61,7 +61,7 @@ int main() {
 
 	//SetCursorPosition(0, cursorPos.Y);
 	SetCursorPosition(0, 0);
-	printColoredMessage("РќР• РЈР”РђР›РЇР™РўР• РџРђРџРљР " + binaryPath + " Р " + videoEncryptedPath + " Р РРҐ РЎРћР”Р•Р Р–РРњРћР• Р’Рћ РР—Р‘Р•Р–РђРќРР• РџРћРўР•Р Р РРќР¤РћР РњРђР¦РР\n", CONSOLE_RED);
+	printColoredMessage("НЕ УДАЛЯЙТЕ ПАПКИ " + binaryPath + " И " + videoEncryptedPath + " И ИХ СОДЕРЖИМОЕ ВО ИЗБЕЖАНИЕ ПОТЕРИ ИНФОРМАЦИИ\n", CONSOLE_RED);
 
 	std::vector<std::string> paths = { imagesSaveFromPath, imagesSaveToPath, binaryPath, imagesRecoveredDirectory, hashFilePath,
 		videoInputPath, videoEncryptedPath, videoRecoveredDirectory };
@@ -114,46 +114,46 @@ void handleUserInput(char userInput, const std::vector<std::string>& paths) {
 	case 'q':
 		exit(EXIT_SUCCESS);
 	default:
-		printColoredMessage("РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ РІРІРѕРґ", CONSOLE_RED);
+		printColoredMessage("Некорректный ввод", CONSOLE_RED);
 		break;
 	}
 }
 
 void printHelp() {
 	std::cout << "\n\n";
-	printCentered("РџСЂРѕРіСЂР°РјРјР° РґР»СЏ С€РёС„СЂРѕРІР°РЅРёСЏ Рё СЃРѕРєСЂС‹С‚РёСЏ РёР·РѕР±СЂР°Р¶РµРЅРёР№ Рё РІРёРґРµРѕ.\n", CONSOLE_GREEN);
+	printCentered("Программа для шифрования и сокрытия изображений и видео.\n", CONSOLE_GREEN);
 
-	printColoredMessage("Р­С‚Р° РїСЂРѕРіСЂР°РјРјР° РїРѕР·РІРѕР»СЏРµС‚ РІР°Рј:", CONSOLE_DARK_CYAN);
-	std::cout << "1. РЎРѕС…СЂР°РЅРёС‚СЊ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ РІ Р±РёРЅР°СЂРЅС‹Р№ С„Р°Р№Р»." << std::endl;
-	std::cout << "2. Р—Р°РіСЂСѓР·РёС‚СЊ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ РёР· Р±РёРЅР°СЂРЅРѕРіРѕ С„Р°Р№Р»Р°." << std::endl;
-	std::cout << "3. Р—Р°С€РёС„СЂРѕРІР°С‚СЊ Рё СЂР°СЃС€РёС„СЂРѕРІР°С‚СЊ РІРёРґРµРѕС„Р°Р№Р»С‹." << std::endl;
-	std::cout << "4. РЈРґР°Р»СЏС‚СЊ С„Р°Р№Р»С‹ Рё РїР°РїРєРё, СЃРІСЏР·Р°РЅРЅС‹Рµ СЃ РїСЂРѕС†РµСЃСЃРѕРј С€РёС„СЂРѕРІР°РЅРёСЏ Рё СЃРѕРєСЂС‹С‚РёСЏ." << std::endl;
+	printColoredMessage("Эта программа позволяет вам:", CONSOLE_DARK_CYAN);
+	std::cout << "1. Сохранить изображения в бинарный файл." << std::endl;
+	std::cout << "2. Загрузить изображения из бинарного файла." << std::endl;
+	std::cout << "3. Зашифровать и расшифровать видеофайлы." << std::endl;
+	std::cout << "4. Удалять файлы и папки, связанные с процессом шифрования и сокрытия." << std::endl;
 	std::cout << std::endl;
 
-	printColoredMessage("РСЃРїРѕР»СЊР·СѓРµРјС‹Рµ РїСѓС‚Рё Рё РїР°РїРєРё:", CONSOLE_DARK_CYAN);
+	printColoredMessage("Используемые пути и папки:", CONSOLE_DARK_CYAN);
 
-	printColoredMessage("\nР”Р»СЏ РёР·РѕР±СЂР°Р¶РµРЅРёР№:", CONSOLE_DARK_YELLOW);
-	std::cout << " - РљР°С‚Р°Р»РѕРі РґР»СЏ Р·Р°РіСЂСѓР·РєРё РёР·РѕР±СЂР°Р¶РµРЅРёР№: " << imagesSaveFromPath << std::endl;
-	std::cout << " - РљР°С‚Р°Р»РѕРі РґР»СЏ СЃРѕС…СЂР°РЅРµРЅРёСЏ РёР·РѕР±СЂР°Р¶РµРЅРёР№ РІ Р±РёРЅР°СЂРЅРѕРј С„РѕСЂРјР°С‚Рµ: " << binaryPath << std::endl;
-	std::cout << " - РљР°С‚Р°Р»РѕРі РґР»СЏ РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёСЏ РёР·РѕР±СЂР°Р¶РµРЅРёР№: " << imagesRecoveredDirectory << std::endl;
-	std::cout << " - РљР°С‚Р°Р»РѕРі РґР»СЏ СЃРѕС…СЂР°РЅРµРЅРёСЏ С…СЌС€Р° РёР·РѕР±СЂР°Р¶РµРЅРёР№: " << hashFilePath << std::endl;
-	printColoredMessage("\nР”Р»СЏ РІРёРґРµРѕ:", CONSOLE_DARK_YELLOW);
-	std::cout << " - РљР°С‚Р°Р»РѕРі РґР»СЏ РІС…РѕРґРЅС‹С… РІРёРґРµРѕС„Р°Р№Р»РѕРІ: " << videoInputPath << std::endl;
-	std::cout << " - РљР°С‚Р°Р»РѕРі РґР»СЏ СЃРѕС…СЂР°РЅРµРЅРёСЏ Р·Р°С€РёС„СЂРѕРІР°РЅРЅС‹С… РІРёРґРµРѕС„Р°Р№Р»РѕРІ: " << videoEncryptedPath << std::endl;
-	std::cout << " - РљР°С‚Р°Р»РѕРі РґР»СЏ РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёСЏ СЂР°СЃС€РёС„СЂРѕРІР°РЅРЅС‹С… РІРёРґРµРѕС„Р°Р№Р»РѕРІ: " << videoRecoveredDirectory << std::endl;
+	printColoredMessage("\nДля изображений:", CONSOLE_DARK_YELLOW);
+	std::cout << " - Каталог для загрузки изображений: " << imagesSaveFromPath << std::endl;
+	std::cout << " - Каталог для сохранения изображений в бинарном формате: " << binaryPath << std::endl;
+	std::cout << " - Каталог для восстановления изображений: " << imagesRecoveredDirectory << std::endl;
+	std::cout << " - Каталог для сохранения хэша изображений: " << hashFilePath << std::endl;
+	printColoredMessage("\nДля видео:", CONSOLE_DARK_YELLOW);
+	std::cout << " - Каталог для входных видеофайлов: " << videoInputPath << std::endl;
+	std::cout << " - Каталог для сохранения зашифрованных видеофайлов: " << videoEncryptedPath << std::endl;
+	std::cout << " - Каталог для восстановления расшифрованных видеофайлов: " << videoRecoveredDirectory << std::endl;
 	std::cout << std::endl;
 
-	printColoredMessage("РљР°Рє РїРѕР»СЊР·РѕРІР°С‚СЊСЃСЏ:", CONSOLE_DARK_CYAN);
+	printColoredMessage("Как пользоваться:", CONSOLE_DARK_CYAN);
 
-	std::cout << " - РќРµРѕР±С…РѕРґРёРјРѕ РІРІРµСЃС‚Рё С‡РёСЃР»Рѕ РёР»Рё СЃРёРјРІРѕР», РѕС‚СЂР°Р¶Р°СЋС‰РµРµ РѕРїСЂРµРґРµР»РµРЅРЅС‹Р№ РЅРѕРјРµСЂ РѕРґРЅРѕРіРѕ РёР· РїСѓРЅРєС‚РѕРІ РјРµРЅСЋ" << std::endl;
+	std::cout << " - Необходимо ввести число или символ, отражающее определенный номер одного из пунктов меню" << std::endl;
 	std::cout << std::endl;
 
-	printColoredMessage("Р’РЅРёРјР°РЅРёРµ:", CONSOLE_DARK_RED);
-	std::cout << " - Р”Р°РЅРЅС‹Рµ РёР· " << binaryPath << " РЅРµ СѓРґР°Р»СЏСЋС‚СЃСЏ РїСЂРё РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёРё РёР·РѕР±СЂР°Р¶РµРЅРёР№, РїРѕСЌС‚РѕРјСѓ РїРѕРІС‚РѕСЂРЅРѕ С€РёС„СЂРѕРІР°С‚СЊ РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРЅС‹Рµ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ РЅРµ РЅСѓР¶РЅРѕ\n";
-	std::cout << " - Р—Р°С€РёС„СЂРѕРІР°РЅРЅС‹Рµ РІРёРґРµРѕС„Р°Р№Р»С‹ РёР· " << videoEncryptedPath << " РЅРµ СѓРґР°Р»СЏСЋС‚СЃСЏ РїСЂРё СЂР°СЃС€РёС„СЂРѕРІР°РЅРёРё, РїРѕСЌС‚РѕРјСѓ РїРѕРІС‚РѕСЂРЅРѕ С€РёС„СЂРѕРІР°С‚СЊ РёС… С‚Р°РєР¶Рµ РЅРµ РЅСѓР¶РЅРѕ\n";
-	std::cout << " - РџСЂРё РІС‹Р±РѕСЂРµ 6 РїСѓРЅРєС‚Р° РіР»Р°РІРЅРѕРіРѕ РјРµРЅСЋ - РІРєР»СЋС‡РµРЅРёРµ С€РёС„СЂРѕРІР°РЅРёСЏ РІРёРґРµРѕ РёР· РїР°РїРєРё СЃ СЂР°СЃС€РёС„СЂРѕРІР°РЅРЅС‹РјРё РІРёРґРµРѕ - РґР°РЅРЅР°СЏ РЅР°СЃС‚СЂРѕР№РєР° РґРµР№СЃС‚РІСѓРµС‚ С‚РѕР»СЊРєРѕ РІ СЌС‚РѕС‚ СЂР°Р· Рё РЅРµ Р±СѓРґРµС‚ СЃРѕС…СЂР°РЅРµРЅР° РґР»СЏ РїРѕСЃР»РµРґСѓСЋС‰РёС… Р·Р°РїСѓСЃРєРѕРІ\n";
-	std::cout << " - РЈРґР°Р»РµРЅРёРµ РїР°РїРѕРє Рё С„Р°Р№Р»РѕРІ РЅРµРѕР±СЂР°С‚РёРјРѕ. Р‘СѓРґСЊС‚Рµ РѕСЃС‚РѕСЂРѕР¶РЅС‹ РїСЂРё РІС‹Р±РѕСЂРµ СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓСЋС‰РёС… РїСѓРЅРєС‚РѕРІ РјРµРЅСЋ." << std::endl;
-	std::cout << " - РќРµ СѓРґР°Р»СЏР№С‚Рµ РїР°РїРєРё, СЃРѕРґРµСЂР¶Р°С‰РёРµ РІР°Р¶РЅС‹Рµ С„Р°Р№Р»С‹, С‚Р°РєРёРµ РєР°Рє: " << binaryPath << " Рё " << videoEncryptedPath << " РІРѕ РёР·Р±РµР¶Р°РЅРёРµ РїРѕС‚РµСЂРё СЃРѕС…СЂР°РЅС‘РЅРЅС‹С… РґР°РЅРЅС‹С…." << std::endl;
+	printColoredMessage("Внимание:", CONSOLE_DARK_RED);
+	std::cout << " - Данные из " << binaryPath << " не удаляются при восстановлении изображений, поэтому повторно шифровать восстановленные изображения не нужно\n";
+	std::cout << " - Зашифрованные видеофайлы из " << videoEncryptedPath << " не удаляются при расшифровании, поэтому повторно шифровать их также не нужно\n";
+	std::cout << " - При выборе 6 пункта главного меню - включение шифрования видео из папки с расшифрованными видео - данная настройка действует только в этот раз и не будет сохранена для последующих запусков\n";
+	std::cout << " - Удаление папок и файлов необратимо. Будьте осторожны при выборе соответствующих пунктов меню." << std::endl;
+	std::cout << " - Не удаляйте папки, содержащие важные файлы, такие как: " << binaryPath << " и " << videoEncryptedPath << " во избежание потери сохранённых данных." << std::endl;
 	std::cout << std::endl;
 
 	SET_CONSOLE_DARK_CYAN;
@@ -164,27 +164,27 @@ void printHelp() {
 void showDeletionMenu() {
 	bool exitFlag = false;
 	std::regex numberPattern("^[0-9]+$");
-	printColoredMessage("\nРњРµРЅСЋ СѓРґР°Р»РµРЅРёСЏ С„Р°Р№Р»РѕРІ Рё РїР°РїРѕРє", CONSOLE_CYAN);
+	printColoredMessage("\nМеню удаления файлов и папок", CONSOLE_CYAN);
 
 	while (!exitFlag) {
-		std::cout << "\n0, q - РІРѕР·РІСЂР°С‚ РІ РіР»Р°РІРЅРѕРµ РјРµРЅСЋ\n";
-		printColoredMessage("----- РР·РѕР±СЂР°Р¶РµРЅРёСЏ -----", CONSOLE_CYAN);
-		std::cout << "1) РћС‚С‡РёСЃС‚РёС‚СЊ РІСЃСЋ РїР°РїРєСѓ " << imagesBaseDirectory << std::endl;
-		std::cout << "2) РЈРґР°Р»РёС‚СЊ РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРЅС‹Рµ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ РёР· " << imagesRecoveredDirectory << std::endl;
-		std::cout << "3) РЈРґР°Р»РёС‚СЊ СЃРѕС…СЂР°РЅРµРЅРЅС‹Рµ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ РёР· " << imagesSaveToPath << std::endl;
-		std::cout << "4) РЈРґР°Р»РёС‚СЊ РЅРµСЃРѕС…СЂР°РЅРµРЅРЅС‹Рµ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ РёР· " << imagesSaveFromPath << std::endl;
-		printColoredMessage("----- Р’РёРґРµРѕ -----", CONSOLE_CYAN);
-		std::cout << "5) РЈРґР°Р»РёС‚СЊ РІСЃС‘ РёР· " << videoBaseDirectory << std::endl;
-		std::cout << "6) РЈРґР°Р»РёС‚СЊ РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРЅС‹Рµ РІРёРґРµРѕ РёР· " << videoRecoveredDirectory << std::endl;
-		std::cout << "7) РЈРґР°Р»РёС‚СЊ Р·Р°С€РёС„СЂРѕРІР°РЅРЅС‹Рµ РІРёРґРµРѕ РёР· " << videoEncryptedPath << std::endl;
-		std::cout << "8) РЈРґР°Р»РёС‚СЊ РЅРµСЃРѕС…СЂР°РЅРµРЅРЅС‹Рµ РІРёРґРµРѕ РёР· " << videoInputPath << std::endl;
-		printColoredMessage("----- РР·РѕР±СЂР°Р¶РµРЅРёСЏ + Р’РёРґРµРѕ -----", CONSOLE_CYAN);
-		std::cout << "9) РЈРґР°Р»РёС‚СЊ РІСЃС‘ РёР· " << imagesBaseDirectory + " Р " + videoBaseDirectory << std::endl;
-		std::cout << "10) РЈРґР°Р»РёС‚СЊ РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРЅС‹Рµ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ Рё РІРёРґРµРѕ РёР· " << imagesRecoveredDirectory + " Р " + videoRecoveredDirectory << std::endl;
-		std::cout << "11) РЈРґР°Р»РёС‚СЊ СЃРѕС…СЂР°РЅРµРЅРЅС‹Рµ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ РёР· " << imagesSaveToPath + " Р Р·Р°С€РёС„СЂРѕРІР°РЅРЅС‹Рµ РІРёРґРµРѕ РёР· " + videoEncryptedPath << std::endl;
-		std::cout << "12) РЈРґР°Р»РёС‚СЊ РЅРµСЃРѕС…СЂР°РЅРµРЅРЅС‹Рµ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ Рё РІРёРґРµРѕ РёР· " << imagesSaveFromPath + " Р " + videoInputPath << std::endl;
+		std::cout << "\n0, q - возврат в главное меню\n";
+		printColoredMessage("----- Изображения -----", CONSOLE_CYAN);
+		std::cout << "1) Отчистить всю папку " << imagesBaseDirectory << std::endl;
+		std::cout << "2) Удалить восстановленные изображения из " << imagesRecoveredDirectory << std::endl;
+		std::cout << "3) Удалить сохраненные изображения из " << imagesSaveToPath << std::endl;
+		std::cout << "4) Удалить несохраненные изображения из " << imagesSaveFromPath << std::endl;
+		printColoredMessage("----- Видео -----", CONSOLE_CYAN);
+		std::cout << "5) Удалить всё из " << videoBaseDirectory << std::endl;
+		std::cout << "6) Удалить восстановленные видео из " << videoRecoveredDirectory << std::endl;
+		std::cout << "7) Удалить зашифрованные видео из " << videoEncryptedPath << std::endl;
+		std::cout << "8) Удалить несохраненные видео из " << videoInputPath << std::endl;
+		printColoredMessage("----- Изображения + Видео -----", CONSOLE_CYAN);
+		std::cout << "9) Удалить всё из " << imagesBaseDirectory + " И " + videoBaseDirectory << std::endl;
+		std::cout << "10) Удалить восстановленные изображения и видео из " << imagesRecoveredDirectory + " И " + videoRecoveredDirectory << std::endl;
+		std::cout << "11) Удалить сохраненные изображения из " << imagesSaveToPath + " И зашифрованные видео из " + videoEncryptedPath << std::endl;
+		std::cout << "12) Удалить несохраненные изображения и видео из " << imagesSaveFromPath + " И " + videoInputPath << std::endl;
 
-		printColoredMessage("\nР’РІРµРґРёС‚Рµ РІР°С€ РІС‹Р±РѕСЂ: ", CONSOLE_BLUE, "");
+		printColoredMessage("\nВведите ваш выбор: ", CONSOLE_BLUE, "");
 
 		std::string userInput;
 		std::getline(std::cin, userInput);
@@ -195,7 +195,7 @@ void showDeletionMenu() {
 		}
 
 		if (!std::regex_match(userInput, numberPattern)) {
-			printColoredMessage("РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ РІРІРѕРґ", CONSOLE_RED);
+			printColoredMessage("Некорректный ввод", CONSOLE_RED);
 			continue;
 		}
 
@@ -204,33 +204,33 @@ void showDeletionMenu() {
 			size_t pos;
 			choice = std::stoi(userInput, &pos);
 			if (pos != userInput.length()) {
-				printColoredMessage("РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ РІРІРѕРґ", CONSOLE_RED);
+				printColoredMessage("Некорректный ввод", CONSOLE_RED);
 				continue;
 			}
 		}
 		catch (std::invalid_argument&) {
-			printColoredMessage("РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ РІРІРѕРґ", CONSOLE_RED);
+			printColoredMessage("Некорректный ввод", CONSOLE_RED);
 			continue;
 		}
 		catch (std::out_of_range&) {
-			printColoredMessage("РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ РІРІРѕРґ", CONSOLE_RED);
+			printColoredMessage("Некорректный ввод", CONSOLE_RED);
 			continue;
 		}
 
-		printColoredMessage("\nР’РќРРњРђРќРР•: ", CONSOLE_RED, "");
-		printColoredMessage(" СЌС‚Рѕ РґРµР№СЃС‚РІРёРµ РЅРµР»СЊР·СЏ Р±СѓРґРµС‚ РѕС‚РјРµРЅРёС‚СЊ Рё РґР°РЅРЅС‹Рµ Р±СѓРґСѓС‚ СѓРґР°Р»РµРЅС‹ ", CONSOLE_CYAN, "");
-		printColoredMessage("Р‘Р•Р—Р’РћР—Р’Р РђРўРќРћ", CONSOLE_RED, "");
+		printColoredMessage("\nВНИМАНИЕ: ", CONSOLE_RED, "");
+		printColoredMessage(" это действие нельзя будет отменить и данные будут удалены ", CONSOLE_CYAN, "");
+		printColoredMessage("БЕЗВОЗВРАТНО", CONSOLE_RED, "");
 
 		char confirm;
 		do {
-			printColoredMessage("\nР–РµР»Р°РµС‚Рµ РїСЂРѕРґРѕР»Р¶РёС‚СЊ (y/n)? ", CONSOLE_CYAN, "");
+			printColoredMessage("\nЖелаете продолжить (y/n)? ", CONSOLE_CYAN, "");
 			std::cin >> confirm;
 			confirm = std::tolower(confirm);
 			std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 		} while (confirm != 'y' && confirm != 'n');
 
 		if (confirm == 'n') {
-			printColoredMessage("РЈРґР°Р»РµРЅРёРµ Р±С‹Р»Рѕ РѕС‚РјРµРЅРµРЅРѕ", CONSOLE_YELLOW);
+			printColoredMessage("Удаление было отменено", CONSOLE_YELLOW);
 			continue;
 		}
 
@@ -282,23 +282,23 @@ void showDeletionMenu() {
 			imghider::clearDirectory(videoInputPath);
 			break;
 		default:
-			std::cout << "РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ РІРІРѕРґ\n";
+			std::cout << "Некорректный ввод\n";
 			break;
 		}
 	}
-	printColoredMessage("\nР’РѕР·РІСЂР°С‚ РІ РіР»Р°РІРЅРѕРµ РјРµРЅСЋ. . .", CONSOLE_CYAN);
+	printColoredMessage("\nВозврат в главное меню. . .", CONSOLE_CYAN);
 }
 
 void displayMainMenu() {
-	printColoredMessage("\nР“Р»Р°РІРЅРѕРµ РјРµРЅСЋ:", CONSOLE_CYAN);
-	std::cout << "0, q - РІС‹С…РѕРґ\n";
-	std::cout << "1) РЎРѕР·РґР°С‚СЊ РІСЃРµ РЅРµРѕР±С…РѕРґРёРјС‹Рµ РїР°РїРєРё Рё С„Р°Р№Р»С‹\n";
-	std::cout << "2) РЎРѕС…СЂР°РЅРёС‚СЊ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ РёР· " << imagesSaveFromPath << std::endl;
-	std::cout << "3) Р—Р°РіСЂСѓР·РёС‚СЊ СЃРѕС…СЂР°РЅРµРЅРЅС‹Рµ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ РёР· " << binaryPath << std::endl;
-	std::cout << "4) Р—Р°С€РёС„СЂРѕРІР°С‚СЊ РІРёРґРµРѕ РёР· " << videoInputPath << std::endl;
-	std::cout << "5) Р Р°СЃС€РёС„СЂРѕРІР°С‚СЊ РІРёРґРµРѕ РёР· " << videoEncryptedPath << std::endl;
-	std::cout << "6) РўР°РєР¶Рµ С€РёС„СЂРѕРІР°С‚СЊ СЂР°СЃС€РёС„СЂРѕРІР°РЅРЅС‹Рµ С„Р°Р№Р»С‹ РёР· " << videoInputPath << " РїСЂРё РІС‹Р±РѕСЂРµ 4 РїСѓРЅРєС‚Р° Рё СЃРѕС…СЂР°РЅРёС‚СЊ РІ " << videoEncryptedPath << " (РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ РѕРЅРё РќР• РЁРР¤Р РЈР®РўРЎРЇ, Р·Р°С€РёС„СЂРѕРІР°РЅРЅС‹Рµ С„Р°Р№Р»С‹ РїСЂРё СЂР°СЃС€РёС„СЂРѕРІРєРµ РЅРµ СѓРґР°Р»СЏСЋС‚СЃСЏ!!)" << std::endl;
-	std::cout << "7) РњРµРЅСЋ СѓРґР°Р»РµРЅРёСЏ С„Р°Р№Р»РѕРІ Рё РїР°РїРѕРє\n";
-	std::cout << "8) РЎРїСЂР°РІРєР° РїРѕ РїСЂРѕРіСЂР°РјРјРµ\n";
-	printColoredMessage("\nР’РІРµРґРёС‚Рµ РІР°С€ РІС‹Р±РѕСЂ: ", CONSOLE_BLUE, "");
+	printColoredMessage("\nГлавное меню:", CONSOLE_CYAN);
+	std::cout << "0, q - выход\n";
+	std::cout << "1) Создать все необходимые папки и файлы\n";
+	std::cout << "2) Сохранить изображения из " << imagesSaveFromPath << std::endl;
+	std::cout << "3) Загрузить сохраненные изображения из " << binaryPath << std::endl;
+	std::cout << "4) Зашифровать видео из " << videoInputPath << std::endl;
+	std::cout << "5) Расшифровать видео из " << videoEncryptedPath << std::endl;
+	std::cout << "6) Также шифровать расшифрованные файлы из " << videoInputPath << " при выборе 4 пункта и сохранить в " << videoEncryptedPath << " (по умолчанию они НЕ ШИФРУЮТСЯ, зашифрованные файлы при расшифровке не удаляются!!)" << std::endl;
+	std::cout << "7) Меню удаления файлов и папок\n";
+	std::cout << "8) Справка по программе\n";
+	printColoredMessage("\nВведите ваш выбор: ", CONSOLE_BLUE, "");
 }

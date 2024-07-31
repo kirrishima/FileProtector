@@ -1,4 +1,4 @@
-ï»¿#pragma once
+#pragma once
 #include <Windows.h>
 #include <string>
 #define NOMINMAX
@@ -31,7 +31,7 @@ for (int codeId = 0; codeId < 255; codeId++)\
 
 #define CONSOLE_DEFAULT         defaultAttributes
 
-// ÐœÐ°ÐºÑ€Ð¾ÑÑ‹ Ð´Ð»Ñ ÑƒÑÑ‚Ð°Ð½Ð¾Ð²ÐºÐ¸ Ñ†Ð²ÐµÑ‚Ð° Ñ‚ÐµÐºÑÑ‚Ð° Ð½Ð° ÐºÐ¾Ð½ÑÐ¾Ð»Ð¸
+// Ìàêðîñû äëÿ óñòàíîâêè öâåòà òåêñòà íà êîíñîëè
 #define SET_CONSOLE_BLACK          SetConsoleColor(CONSOLE_BLACK)
 #define SET_CONSOLE_DARK_BLUE      SetConsoleColor(CONSOLE_DARK_BLUE)
 #define SET_CONSOLE_DARK_GREEN     SetConsoleColor(CONSOLE_DARK_GREEN)
@@ -50,7 +50,7 @@ for (int codeId = 0; codeId < 255; codeId++)\
 #define SET_CONSOLE_WHITE          SetConsoleColor(CONSOLE_WHITE)
 #define SET_CONSOLE_DEFAULT        SetConsoleColor(CONSOLE_DEFAULT)
 
-// ÐœÐµÑ‚Ð¾Ð´Ñ‹ Ð´Ð»Ñ Ñ€Ð°Ð±Ð¾Ñ‚Ñ‹ Ñ ÐºÐ¾Ð½ÑÐ¾Ð»ÑŒÑŽ
+// Ìåòîäû äëÿ ðàáîòû ñ êîíñîëüþ
 extern void SetConsoleColor(int color);
 extern WORD GetConsoleTextAttribute();
 extern void SetCursorPosition(int x, int y);
@@ -70,9 +70,9 @@ COORD cursorPos = csbi.dwCursorPosition; \
 static WORD defaultAttributes = GetConsoleTextAttribute();
 
 /**
- * @brief Ð’Ñ‹Ð²Ð¾Ð´Ð¸Ñ‚ Ñ†Ð²ÐµÑ‚Ð½ÑƒÑŽ ÑÑ‚Ñ€Ð¾ÐºÑƒ Ð½Ð° ÑÐºÑ€Ð°Ð½
+ * @brief Âûâîäèò öâåòíóþ ñòðîêó íà ýêðàí
  *
- * @param isError - ÐµÑÐ»Ð¸ true, Ñ†Ð²ÐµÑ‚ ÑÑ‚Ñ€Ð¾ÐºÐ¸ Ð±ÑƒÐ´ÐµÑ‚ ÐºÑ€Ð°ÑÐ½Ñ‹Ð¼, Ð¸Ð½Ð°Ñ‡Ðµ Ð·ÐµÐ»ÐµÐ½Ñ‹Ð¼
+ * @param isError - åñëè true, öâåò ñòðîêè áóäåò êðàñíûì, èíà÷å çåëåíûì
  */
 void printColoredMessage(const std::string& message, WORD outputColor, std::string end = "\n");
 
