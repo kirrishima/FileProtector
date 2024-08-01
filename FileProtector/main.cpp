@@ -48,12 +48,13 @@ void printHelp();
 
 
 int main() {
+	ResizeConsole(36, 120, 10000, 120);
+
 	std::setlocale(LC_ALL, "ru_RU");
 	SetConsoleCP(1251);
-
 	//SetConsoleOutputCP(1251);
 	//SetConsoleCP(1251);
-	ResizeConsole(36, 120, 10000, 120);
+
 
 	if (!authenticateUser()) {
 		return 1;
