@@ -1,5 +1,5 @@
-#include "stdafx.h"
-#include "imghider.h"
+п»ї#include "stdafx.h"
+
 #include <cstdint>
 #include <ctime>
 #include <iomanip>
@@ -9,7 +9,7 @@ namespace imghider {
 		try {
 			std::ifstream hashFile(hashFilePath);
 			if (!hashFile) {
-				printColoredMessage("Ошибка при поиске хэша: не удалось открыть файл " + hashFilePath, CONSOLE_RED);
+				printColoredMessage("РћС€РёР±РєР° РїСЂРё РїРѕРёСЃРєРµ С…СЌС€Р°: РЅРµ СѓРґР°Р»РѕСЃСЊ РѕС‚РєСЂС‹С‚СЊ С„Р°Р№Р» " + hashFilePath, CONSOLE_RED);
 				return false;
 			}
 
@@ -21,13 +21,13 @@ namespace imghider {
 			}
 		}
 		catch (const std::ifstream::failure& e) {
-			printColoredMessage("Ошибка при чтении файла хэша: " + std::string(e.what()), CONSOLE_RED);
+			printColoredMessage("РћС€РёР±РєР° РїСЂРё С‡С‚РµРЅРёРё С„Р°Р№Р»Р° С…СЌС€Р°: " + std::string(e.what()), CONSOLE_RED);
 		}
 		catch (const std::exception& e) {
-			printColoredMessage("Общая ошибка: " + std::string(e.what()), CONSOLE_RED);
+			printColoredMessage("РћР±С‰Р°СЏ РѕС€РёР±РєР°: " + std::string(e.what()), CONSOLE_RED);
 		}
 		catch (...) {
-			printColoredMessage("Неизвестная ошибка при поиске хэша в файле " + hashFilePath, CONSOLE_RED);
+			printColoredMessage("РќРµРёР·РІРµСЃС‚РЅР°СЏ РѕС€РёР±РєР° РїСЂРё РїРѕРёСЃРєРµ С…СЌС€Р° РІ С„Р°Р№Р»Рµ " + hashFilePath, CONSOLE_RED);
 		}
 
 		return false;
@@ -37,19 +37,19 @@ namespace imghider {
 		try {
 			std::ofstream hashFile(hashFilePath, std::ios::out | std::ios::app);
 			if (!hashFile) {
-				printColoredMessage("Ошибка при записи хэша: не удалось открыть файл " + hashFilePath, CONSOLE_RED);
+				printColoredMessage("РћС€РёР±РєР° РїСЂРё Р·Р°РїРёСЃРё С…СЌС€Р°: РЅРµ СѓРґР°Р»РѕСЃСЊ РѕС‚РєСЂС‹С‚СЊ С„Р°Р№Р» " + hashFilePath, CONSOLE_RED);
 				return;
 			}
 			hashFile << hashValue << std::endl;
 		}
 		catch (const std::ofstream::failure& e) {
-			printColoredMessage("Ошибка при записи в файл хэша: " + std::string(e.what()), CONSOLE_RED);
+			printColoredMessage("РћС€РёР±РєР° РїСЂРё Р·Р°РїРёСЃРё РІ С„Р°Р№Р» С…СЌС€Р°: " + std::string(e.what()), CONSOLE_RED);
 		}
 		catch (const std::exception& e) {
-			printColoredMessage("Общая ошибка: " + std::string(e.what()), CONSOLE_RED);
+			printColoredMessage("РћР±С‰Р°СЏ РѕС€РёР±РєР°: " + std::string(e.what()), CONSOLE_RED);
 		}
 		catch (...) {
-			printColoredMessage("Неизвестная ошибка при записи хэша в файл " + hashFilePath, CONSOLE_RED);
+			printColoredMessage("РќРµРёР·РІРµСЃС‚РЅР°СЏ РѕС€РёР±РєР° РїСЂРё Р·Р°РїРёСЃРё С…СЌС€Р° РІ С„Р°Р№Р» " + hashFilePath, CONSOLE_RED);
 		}
 	}
 

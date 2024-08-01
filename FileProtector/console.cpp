@@ -1,5 +1,4 @@
-#include "stdafx.h"
-#include "console.h"
+п»ї#include "stdafx.h"
 
 void SetConsoleColor(int color) {
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -51,21 +50,21 @@ void printCentered(const std::string& text, WORD outputColor, std::string end) {
 
 
 int GetConsoleWindowHeight() {
-	// Получаем дескриптор консоли
+	// РџРѕР»СѓС‡Р°РµРј РґРµСЃРєСЂРёРїС‚РѕСЂ РєРѕРЅСЃРѕР»Рё
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	if (hConsole == INVALID_HANDLE_VALUE) {
-		std::cerr << "Не удалось получить дескриптор консоли.\n";
-		return -1; // Возвращаем -1 в случае ошибки
+		std::cerr << "РќРµ СѓРґР°Р»РѕСЃСЊ РїРѕР»СѓС‡РёС‚СЊ РґРµСЃРєСЂРёРїС‚РѕСЂ РєРѕРЅСЃРѕР»Рё.\n";
+		return -1; // Р’РѕР·РІСЂР°С‰Р°РµРј -1 РІ СЃР»СѓС‡Р°Рµ РѕС€РёР±РєРё
 	}
 
-	// Структура для хранения информации о буфере экрана
+	// РЎС‚СЂСѓРєС‚СѓСЂР° РґР»СЏ С…СЂР°РЅРµРЅРёСЏ РёРЅС„РѕСЂРјР°С†РёРё Рѕ Р±СѓС„РµСЂРµ СЌРєСЂР°РЅР°
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	if (!GetConsoleScreenBufferInfo(hConsole, &csbi)) {
-		std::cerr << "Не удалось получить информацию о буфере экрана.\n";
-		return -1; // Возвращаем -1 в случае ошибки
+		std::cerr << "РќРµ СѓРґР°Р»РѕСЃСЊ РїРѕР»СѓС‡РёС‚СЊ РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ Р±СѓС„РµСЂРµ СЌРєСЂР°РЅР°.\n";
+		return -1; // Р’РѕР·РІСЂР°С‰Р°РµРј -1 РІ СЃР»СѓС‡Р°Рµ РѕС€РёР±РєРё
 	}
 
-	// Высота окна в строках
+	// Р’С‹СЃРѕС‚Р° РѕРєРЅР° РІ СЃС‚СЂРѕРєР°С…
 	int windowHeight = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
 	return windowHeight;
 }
@@ -73,13 +72,13 @@ int GetConsoleWindowHeight() {
 int GetConsoleWidth() {
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	if (hConsole == INVALID_HANDLE_VALUE) {
-		std::cerr << "Не удалось получить дескриптор консоли.\n";
+		std::cerr << "РќРµ СѓРґР°Р»РѕСЃСЊ РїРѕР»СѓС‡РёС‚СЊ РґРµСЃРєСЂРёРїС‚РѕСЂ РєРѕРЅСЃРѕР»Рё.\n";
 		return -1;
 	}
 
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	if (!GetConsoleScreenBufferInfo(hConsole, &csbi)) {
-		std::cerr << "Не удалось получить информацию о буфере экрана.\n";
+		std::cerr << "РќРµ СѓРґР°Р»РѕСЃСЊ РїРѕР»СѓС‡РёС‚СЊ РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ Р±СѓС„РµСЂРµ СЌРєСЂР°РЅР°.\n";
 		return -1;
 	}
 
@@ -87,111 +86,111 @@ int GetConsoleWidth() {
 }
 
 void ResizeConsole(int windowHeight, int bufferHeight) {
-	// Получаем дескриптор окна консоли
+	// РџРѕР»СѓС‡Р°РµРј РґРµСЃРєСЂРёРїС‚РѕСЂ РѕРєРЅР° РєРѕРЅСЃРѕР»Рё
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	if (hConsole == INVALID_HANDLE_VALUE) {
-		std::cerr << "Не удалось получить дескриптор консоли.\n";
+		std::cerr << "РќРµ СѓРґР°Р»РѕСЃСЊ РїРѕР»СѓС‡РёС‚СЊ РґРµСЃРєСЂРёРїС‚РѕСЂ РєРѕРЅСЃРѕР»Рё.\n";
 		return;
 	}
 
-	// Получаем текущую информацию о буфере экрана
+	// РџРѕР»СѓС‡Р°РµРј С‚РµРєСѓС‰СѓСЋ РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ Р±СѓС„РµСЂРµ СЌРєСЂР°РЅР°
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	if (!GetConsoleScreenBufferInfo(hConsole, &csbi)) {
-		std::cerr << "Не удалось получить информацию о буфере экрана.\n";
+		std::cerr << "РќРµ СѓРґР°Р»РѕСЃСЊ РїРѕР»СѓС‡РёС‚СЊ РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ Р±СѓС„РµСЂРµ СЌРєСЂР°РЅР°.\n";
 		return;
 	}
 
-	int width = csbi.dwSize.X; // Ширина остается прежней
+	int width = csbi.dwSize.X; // РЁРёСЂРёРЅР° РѕСЃС‚Р°РµС‚СЃСЏ РїСЂРµР¶РЅРµР№
 
-	// Устанавливаем новый размер буфера экрана
+	// РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј РЅРѕРІС‹Р№ СЂР°Р·РјРµСЂ Р±СѓС„РµСЂР° СЌРєСЂР°РЅР°
 	COORD newSize;
 	newSize.X = width;
 	newSize.Y = bufferHeight;
 	if (!SetConsoleScreenBufferSize(hConsole, newSize)) {
-		std::cerr << "Не удалось установить размер буфера экрана.\n";
+		std::cerr << "РќРµ СѓРґР°Р»РѕСЃСЊ СѓСЃС‚Р°РЅРѕРІРёС‚СЊ СЂР°Р·РјРµСЂ Р±СѓС„РµСЂР° СЌРєСЂР°РЅР°.\n";
 		return;
 	}
 
-	// Устанавливаем новый размер окна консоли
+	// РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј РЅРѕРІС‹Р№ СЂР°Р·РјРµСЂ РѕРєРЅР° РєРѕРЅСЃРѕР»Рё
 	SMALL_RECT windowSize;
 	windowSize.Left = 0;
 	windowSize.Top = 0;
 	windowSize.Right = width - 1;
 	windowSize.Bottom = windowHeight - 1;
 	if (!SetConsoleWindowInfo(hConsole, TRUE, &windowSize)) {
-		std::cerr << "Не удалось установить размеры окна консоли.\n";
+		std::cerr << "РќРµ СѓРґР°Р»РѕСЃСЊ СѓСЃС‚Р°РЅРѕРІРёС‚СЊ СЂР°Р·РјРµСЂС‹ РѕРєРЅР° РєРѕРЅСЃРѕР»Рё.\n";
 		return;
 	}
 }
 
 void ResizeConsole(int windowHeight, int windowWidth, int bufferHeight, int bufferWidth) {
-	// Получаем дескриптор окна консоли
+	// РџРѕР»СѓС‡Р°РµРј РґРµСЃРєСЂРёРїС‚РѕСЂ РѕРєРЅР° РєРѕРЅСЃРѕР»Рё
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	if (hConsole == INVALID_HANDLE_VALUE) {
-		std::cerr << "Не удалось получить дескриптор консоли.\n";
+		std::cerr << "РќРµ СѓРґР°Р»РѕСЃСЊ РїРѕР»СѓС‡РёС‚СЊ РґРµСЃРєСЂРёРїС‚РѕСЂ РєРѕРЅСЃРѕР»Рё.\n";
 		return;
 	}
 
-	// Устанавливаем новый размер буфера экрана
+	// РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј РЅРѕРІС‹Р№ СЂР°Р·РјРµСЂ Р±СѓС„РµСЂР° СЌРєСЂР°РЅР°
 	COORD newSize;
 	newSize.X = bufferWidth;
 	newSize.Y = bufferHeight;
 	if (!SetConsoleScreenBufferSize(hConsole, newSize)) {
-		std::cerr << "Не удалось установить размер буфера экрана.\n";
+		std::cerr << "РќРµ СѓРґР°Р»РѕСЃСЊ СѓСЃС‚Р°РЅРѕРІРёС‚СЊ СЂР°Р·РјРµСЂ Р±СѓС„РµСЂР° СЌРєСЂР°РЅР°.\n";
 		return;
 	}
 
-	// Устанавливаем новый размер окна консоли
+	// РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј РЅРѕРІС‹Р№ СЂР°Р·РјРµСЂ РѕРєРЅР° РєРѕРЅСЃРѕР»Рё
 	SMALL_RECT windowSize;
 	windowSize.Left = 0;
 	windowSize.Top = 0;
 	windowSize.Right = windowWidth - 1;
 	windowSize.Bottom = windowHeight - 1;
 	if (!SetConsoleWindowInfo(hConsole, TRUE, &windowSize)) {
-		std::cerr << "Не удалось установить размеры окна консоли.\n";
+		std::cerr << "РќРµ СѓРґР°Р»РѕСЃСЊ СѓСЃС‚Р°РЅРѕРІРёС‚СЊ СЂР°Р·РјРµСЂС‹ РѕРєРЅР° РєРѕРЅСЃРѕР»Рё.\n";
 		return;
 	}
 }
 
 void SetConsoleFontSize(int fontSizeX, int fontSizeY) {
-	// Получаем дескриптор консоли
+	// РџРѕР»СѓС‡Р°РµРј РґРµСЃРєСЂРёРїС‚РѕСЂ РєРѕРЅСЃРѕР»Рё
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	if (hConsole == INVALID_HANDLE_VALUE) {
-		std::cerr << "Не удалось получить дескриптор консоли.\n";
+		std::cerr << "РќРµ СѓРґР°Р»РѕСЃСЊ РїРѕР»СѓС‡РёС‚СЊ РґРµСЃРєСЂРёРїС‚РѕСЂ РєРѕРЅСЃРѕР»Рё.\n";
 		return;
 	}
 
-	// Получаем текущие свойства шрифта
+	// РџРѕР»СѓС‡Р°РµРј С‚РµРєСѓС‰РёРµ СЃРІРѕР№СЃС‚РІР° С€СЂРёС„С‚Р°
 	CONSOLE_FONT_INFOEX cfi;
 	cfi.cbSize = sizeof(CONSOLE_FONT_INFOEX);
 	if (!GetCurrentConsoleFontEx(hConsole, FALSE, &cfi)) {
-		std::cerr << "Не удалось получить текущие свойства шрифта.\n";
+		std::cerr << "РќРµ СѓРґР°Р»РѕСЃСЊ РїРѕР»СѓС‡РёС‚СЊ С‚РµРєСѓС‰РёРµ СЃРІРѕР№СЃС‚РІР° С€СЂРёС„С‚Р°.\n";
 		return;
 	}
 
-	// Устанавливаем новый размер шрифта
+	// РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј РЅРѕРІС‹Р№ СЂР°Р·РјРµСЂ С€СЂРёС„С‚Р°
 	cfi.dwFontSize.X = fontSizeX;
 	cfi.dwFontSize.Y = fontSizeY;
 	if (!SetCurrentConsoleFontEx(hConsole, FALSE, &cfi)) {
-		std::cerr << "Не удалось установить новый размер шрифта.\n";
+		std::cerr << "РќРµ СѓРґР°Р»РѕСЃСЊ СѓСЃС‚Р°РЅРѕРІРёС‚СЊ РЅРѕРІС‹Р№ СЂР°Р·РјРµСЂ С€СЂРёС„С‚Р°.\n";
 		return;
 	}
 }
 
 std::tuple<short, short> GetConsoleFontSize() {
-	// Получаем дескриптор консоли
+	// РџРѕР»СѓС‡Р°РµРј РґРµСЃРєСЂРёРїС‚РѕСЂ РєРѕРЅСЃРѕР»Рё
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	if (hConsole == INVALID_HANDLE_VALUE) {
-		std::cerr << "Не удалось получить дескриптор консоли.\n";
+		std::cerr << "РќРµ СѓРґР°Р»РѕСЃСЊ РїРѕР»СѓС‡РёС‚СЊ РґРµСЃРєСЂРёРїС‚РѕСЂ РєРѕРЅСЃРѕР»Рё.\n";
 		return std::make_tuple(-1, -1);
 	}
 
-	// Получаем текущие свойства шрифта
+	// РџРѕР»СѓС‡Р°РµРј С‚РµРєСѓС‰РёРµ СЃРІРѕР№СЃС‚РІР° С€СЂРёС„С‚Р°
 	CONSOLE_FONT_INFOEX cfi;
 	cfi.cbSize = sizeof(CONSOLE_FONT_INFOEX);
 
 	if (!GetCurrentConsoleFontEx(hConsole, FALSE, &cfi)) {
-		std::cerr << "Не удалось получить текущие свойства шрифта.\n";
+		std::cerr << "РќРµ СѓРґР°Р»РѕСЃСЊ РїРѕР»СѓС‡РёС‚СЊ С‚РµРєСѓС‰РёРµ СЃРІРѕР№СЃС‚РІР° С€СЂРёС„С‚Р°.\n";
 		return std::make_tuple(-1, -1);
 	}
 

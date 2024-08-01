@@ -1,4 +1,4 @@
-#include "VideoEncryptor.h"
+ï»¿#include "VideoEncryptor.h"
 #include "pch.h"
 #include <iostream> 
 #include <vector>
@@ -8,8 +8,8 @@
 #include <cctype>
 #include <cwctype>
 
-#define IS_CYRILLIC(x) ((L'à' <= (x) && (x) <= L'ÿ') || (L'À' <= (x) && (x) <= L'ß'))
-#define IS_LOWER_CYRILLIC(x) (L'à' <= (x) && (x) <= L'ÿ')
+#define IS_CYRILLIC(x) ((L'Ð°' <= (x) && (x) <= L'Ñ') || (L'Ð' <= (x) && (x) <= L'Ð¯'))
+#define IS_LOWER_CYRILLIC(x) (L'Ð°' <= (x) && (x) <= L'Ñ')
 #define IS_LATIN(x) ((L'a' <= (x) && (x) <= L'z') || (L'A' <= (x) && (x) <= L'Z'))
 std::wstring string_to_wstring(const std::string& str) {
 	// Determine the length of the resulting wide string
@@ -62,7 +62,7 @@ namespace RCC
 			}
 			else if (IS_CYRILLIC(filename[i]))
 			{
-				wchar_t base = (IS_LOWER_CYRILLIC(filename[i])) ? L'à' : L'À';
+				wchar_t base = (IS_LOWER_CYRILLIC(filename[i])) ? L'Ð°' : L'Ð';
 				filename[i] = base + (filename[i] - base + shift + 32) % 32;
 				shift = (shift + step) % maxShift;
 			}

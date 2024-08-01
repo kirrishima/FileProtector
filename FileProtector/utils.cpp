@@ -1,14 +1,25 @@
-#include "stdafx.h"
-#include "imghider.h"
-#include <cstdint>
+п»ї#include "stdafx.h"
+#include "opencv2/core/mat.hpp"
 #include <ctime>
-#include <iomanip>
 #include <hashing.h>
-#include <filesystem>
+#include <iomanip>
+#include <limits>
+
 
 namespace fs = std::filesystem;
 
 namespace imghider {
+
+	namespace {
+		// РќР°Р±РѕСЂ РЅРµРґРѕРїСѓСЃС‚РёРјС‹С… СЃРёРјРІРѕР»РѕРІ РґР»СЏ РёРјРµРЅРё С„Р°Р№Р»Р°
+		const std::string invalidChars = "\\/:*?\"<>|";
+
+		// Р¤СѓРЅРєС†РёСЏ РґР»СЏ РїСЂРѕРІРµСЂРєРё РІР°Р»РёРґРЅРѕСЃС‚Рё РёРјРµРЅРё С„Р°Р№Р»Р°
+		bool isValidFileName(const std::string& fileName) {
+			// РСЃРїРѕР»СЊР·СѓРµРј std::find_first_of РґР»СЏ РїРѕРёСЃРєР° Р»СЋР±РѕРіРѕ РёР· РЅРµРґРѕРїСѓСЃС‚РёРјС‹С… СЃРёРјРІРѕР»РѕРІ
+			return std::find_first_of(fileName.begin(), fileName.end(), invalidChars.begin(), invalidChars.end()) == fileName.end();
+		}
+	}
 
 	std::string getUniqueFilename(const std::string& originalFilename) {
 		try {
@@ -21,13 +32,13 @@ namespace imghider {
 
 			std::ostringstream oss;
 			oss << baseFilename << "_"
-				<< std::put_time(&localTime, "%Y%m%d_%H%M%S")
+				<< std::put_time(&localTime, "%Y_%m_%d__%H_%M_%S")
 				<< extension;
 
 			return oss.str();
 		}
 		catch (const std::exception& e) {
-			printColoredMessage("Ошибка при генерации уникального имени файла: " + std::string(e.what()), CONSOLE_RED);
+			printColoredMessage("РћС€РёР±РєР° РїСЂРё РіРµРЅРµСЂР°С†РёРё СѓРЅРёРєР°Р»СЊРЅРѕРіРѕ РёРјРµРЅРё С„Р°Р№Р»Р°: " + std::string(e.what()), CONSOLE_RED);
 			return originalFilename; // fallback to original filename in case of error
 		}
 	}
@@ -36,61 +47,106 @@ namespace imghider {
 		const std::string& directoryPath,
 		const std::string& binaryPath,
 		const std::string& imagePath,
-		const std::string& filename,
-		const std::string& fileRelPath,
-		std::string& newFilename,
+		const std::string& hashFilePath,
+		fs::path& fileRelPath,
 		std::string& fileHash,
 		const cv::Mat& image
 	) {
 		try {
 			bool flagExit = false;
-			SET_CONSOLE_RED;
-			std::cout << "\nФайл с названием \"" << filename << "\" уже есть в " << binaryPath << std::endl;
-
+			printColoredMessage("\nР¤Р°Р№Р» СЃ РЅР°Р·РІР°РЅРёРµРј \"" + fileRelPath.string() + "\" СѓР¶Рµ РµСЃС‚СЊ РІ " + binaryPath, CONSOLE_DARK_YELLOW);
 			do {
-				printColoredMessage("\n1) Просмотреть сохраненный файл " + binaryPath + '\\' + filename, CONSOLE_CYAN);
-				printColoredMessage("2) Просмотреть файл " + imagePath, CONSOLE_YELLOW);
-				printColoredMessage("3) Сохранить файл с другим названием.", CONSOLE_CYAN);
-				printColoredMessage("4) Пропустить этот файл.\n", CONSOLE_YELLOW);
+				printColoredMessage("\n1) РџСЂРѕСЃРјРѕС‚СЂРµС‚СЊ СЃРѕС…СЂР°РЅРµРЅРЅС‹Р№ С„Р°Р№Р» " + binaryPath + '\\' + fileRelPath.string(), CONSOLE_CYAN);
+				printColoredMessage("2) РџСЂРѕСЃРјРѕС‚СЂРµС‚СЊ С„Р°Р№Р» " + imagePath, CONSOLE_YELLOW);
+				printColoredMessage("3) РЎРѕС…СЂР°РЅРёС‚СЊ С„Р°Р№Р» СЃ РґСЂСѓРіРёРј РЅР°Р·РІР°РЅРёРµРј.", CONSOLE_CYAN);
+				printColoredMessage("4) РџСЂРѕРїСѓСЃС‚РёС‚СЊ СЌС‚РѕС‚ С„Р°Р№Р».\n", CONSOLE_YELLOW);
 
 				SET_CONSOLE_MAGENTA;
-				int x;
+				uchar x;
 				std::cin >> x;
-				std::cin.ignore();
+				std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 				SET_CONSOLE_DEFAULT;
 
 				switch (x) {
-				case 1:
-					printColoredMessage("\nПоиск " + filename + " в " + binaryPath + ". . .", CONSOLE_BLUE);
-					findAndDisplayImage(binaryPath, fileRelPath);
+				case '1':
+					printColoredMessage("\nРџРѕРёСЃРє " + fileRelPath.string() + " РІ " + binaryPath + ". . .", CONSOLE_BLUE);
+					findAndDisplayImage(binaryPath, fileRelPath.string());
 					break;
-				case 2:
+				case '2':
 					displayImage(image, imagePath);
 					break;
-				case 3: {
+				case '3': {
+					do {
+						std::cout << "\n\n";
+						printColoredMessage("1) Р”РѕР±Р°РІРёС‚СЊ Рє РёРјРµРЅРё С„Р°Р№Р»Р° РґР°С‚Сѓ Рё РІСЂРµРјСЏ", CONSOLE_CYAN);
+						printColoredMessage("2) Р’РІРµСЃС‚Рё РЅРѕРІРѕРµ РЅР°Р·РІР°РЅРёРµ СЃ РєР»Р°РІРёР°С‚СѓСЂС‹\n", CONSOLE_YELLOW);
 
-					newFilename = getUniqueFilename(filename);
-					fileHash = safe_hashing::sha256(newFilename);
-					flagExit = true;
+						SET_CONSOLE_MAGENTA;
+						uchar x;
+						std::cin >> x;
+						std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+						SET_CONSOLE_DEFAULT;
+
+						switch (x)
+						{
+						case '1':
+							fileRelPath = fs::path(getUniqueFilename(fileRelPath.string()));
+							printColoredMessage("\nРќРѕРІРѕРµ РёРјСЏ С„Р°Р№Р»Р°: " + fileRelPath.string(), CONSOLE_YELLOW);
+							fileHash = safe_hashing::sha256(RCC::encryptFilename(fileRelPath.wstring(), RCC_Shift));
+							return false;
+						case '2':
+						{
+							std::locale::global(std::locale("Russian_Russia.1251"));
+							printColoredMessage("\nР’РІРµРґРёС‚Рµ РЅРѕРІРѕРµ РЅР°Р·РІР°РЅРёРµ (Р±РµР· СЂР°СЃС€РёСЂРµРЅРёСЏ): ", CONSOLE_BLUE, "");
+							std::string newFilename;
+							std::getline(std::cin, newFilename);
+
+							while (true)
+							{
+								while (newFilename.empty() || newFilename == "" || !isValidFileName(newFilename))
+								{
+									printColoredMessage("\nРРјСЏ С„Р°Р№Р»Р° РЅРµ РґРѕР»Р¶РЅРѕ СЃРѕРґРµСЂР¶Р°С‚СЊ СЃР»РµРґСѓСЋС‰РёС… СЃРёРјРІРѕР»РѕРІ: " + invalidChars + "\nРџРѕРІС‚РѕСЂРёС‚Рµ РІРІРѕРґ: ", CONSOLE_DARK_YELLOW, "");
+									std::getline(std::cin, newFilename);
+
+								}
+								fileRelPath = fileRelPath.parent_path() / (newFilename + fileRelPath.extension().string());
+
+								fileHash = safe_hashing::sha256(RCC::encryptFilename(fileRelPath.wstring(), RCC_Shift));
+								if (isNameHashInFile(hashFilePath, fileHash)) {
+									printColoredMessage("Р¤Р°Р№Р» " + fileRelPath.string() + " СѓР¶Рµ СЃСѓС‰РµСЃС‚РІСѓРµС‚. Р’С‹Р±РµСЂРµС‚Рµ РґСЂСѓРіРѕРµ РёРјСЏ", CONSOLE_YELLOW);
+									newFilename.clear();
+								}
+								else {
+									printColoredMessage("\nРќРѕРІРѕРµ РёРјСЏ С„Р°Р№Р»Р°: " + fileRelPath.string(), CONSOLE_YELLOW);
+									return false;
+								}
+							}
+						}
+						default:
+							printColoredMessage("РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ РІРІРѕРґ: " + std::to_string(x) + ". РџРѕРІС‚РѕСЂРёС‚Рµ РїРѕРїС‹С‚РєСѓ\n", CONSOLE_RED);
+							break;
+						}
+					} while (true);
+
 					break;
 				}
-				case 4:
+				case '4':
 					SET_CONSOLE_DEFAULT;
-					std::cout << "\nФайл " + imagePath + " остался в " + directoryPath + " и не был сохранен в " + binaryPath << std::endl;
+					std::cout << "\nР¤Р°Р№Р» " + fileRelPath.string() + " РѕСЃС‚Р°Р»СЃСЏ РІ " + directoryPath + " Рё РЅРµ Р±С‹Р» СЃРѕС…СЂР°РЅРµРЅ РІ " + binaryPath << std::endl;
 					return true;
 				default:
-					printColoredMessage("Некорректный ввод: " + std::to_string(x) + ". Повторите попытку\n", CONSOLE_RED);
+					printColoredMessage("РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ РІРІРѕРґ. РџРѕРІС‚РѕСЂРёС‚Рµ РїРѕРїС‹С‚РєСѓ\n", CONSOLE_RED);
 				}
-			} while (!flagExit);
+			} while (true);
 		}
 		catch (const std::exception& e) {
-			printColoredMessage("Ошибка при разрешении дубликата: " + std::string(e.what()), CONSOLE_RED);
+			printColoredMessage("РћС€РёР±РєР° РїСЂРё СЂР°Р·СЂРµС€РµРЅРёРё РґСѓР±Р»РёРєР°С‚Р°: " + std::string(e.what()), CONSOLE_RED);
 			return true; // return true to skip the file in case of error
 		}
 		return false;
 	}
 
-	// Функция для разделения строки по заданному разделителю
+	// Р¤СѓРЅРєС†РёСЏ РґР»СЏ СЂР°Р·РґРµР»РµРЅРёСЏ СЃС‚СЂРѕРєРё РїРѕ Р·Р°РґР°РЅРЅРѕРјСѓ СЂР°Р·РґРµР»РёС‚РµР»СЋ
 	std::vector<std::string> split(const std::string& str, char delimiter) {
 		std::vector<std::string> tokens;
 		std::string token;
@@ -101,11 +157,11 @@ namespace imghider {
 		return tokens;
 	}
 
-	// Функция для получения последнего элемента после разделения строки
+	// Р¤СѓРЅРєС†РёСЏ РґР»СЏ РїРѕР»СѓС‡РµРЅРёСЏ РїРѕСЃР»РµРґРЅРµРіРѕ СЌР»РµРјРµРЅС‚Р° РїРѕСЃР»Рµ СЂР°Р·РґРµР»РµРЅРёСЏ СЃС‚СЂРѕРєРё
 	std::string get_last_split_element(const std::string& str, char delimiter) {
 		std::vector<std::string> tokens = split(str, delimiter);
 		if (!tokens.empty()) {
-			return tokens.back(); // Получаем последний элемент
+			return tokens.back(); // РџРѕР»СѓС‡Р°РµРј РїРѕСЃР»РµРґРЅРёР№ СЌР»РµРјРµРЅС‚
 		}
 		return "";
 	}

@@ -1,4 +1,4 @@
-#ifndef VIDEO_ENCRYPTOR_H
+п»ї#ifndef VIDEO_ENCRYPTOR_H
 #define VIDEO_ENCRYPTOR_H
 #include <stdexcept>
 #include <fstream>
@@ -8,9 +8,9 @@
 
 namespace fs = std::filesystem;
 
-// Определения для проверки символов кириллицы
-#define IS_CYRILLIC(x) (('а' <= (x) && (x) <= 'я') || ('А' <= (x) && (x) <= 'Я'))
-#define IS_LOWER_CYRILLIC(x) ('а' <= (x) && (x) <= 'я')
+// РћРїСЂРµРґРµР»РµРЅРёСЏ РґР»СЏ РїСЂРѕРІРµСЂРєРё СЃРёРјРІРѕР»РѕРІ РєРёСЂРёР»Р»РёС†С‹
+#define IS_CYRILLIC(x) (('Р°' <= (x) && (x) <= 'СЏ') || ('Рђ' <= (x) && (x) <= 'РЇ'))
+#define IS_LOWER_CYRILLIC(x) ('Р°' <= (x) && (x) <= 'СЏ')
 
 #define STR_DEFAULT_KEY "Force_AKA_Moonglow"
 #define STR_DEFAULT_BASE_DIRECTORY "VIDS"
@@ -26,7 +26,7 @@ class VideoEncryptor
 {
 public:
 
-	// Константы 
+	// РљРѕРЅСЃС‚Р°РЅС‚С‹ 
 	static const std::string DEFAULT_KEY;
 	static const std::string DEFAULT_BASE_DIRECTORY;
 	static const std::string DEFAULT_INPUT_FOLDER;
@@ -35,11 +35,11 @@ public:
 	static constexpr int DEFAULT_SHIFT = INT_DEFAULT_SHIFT;
 	static constexpr bool DEFAULT_ENCRYPT_DECRYPTED_FOLDER = BOOL_DEFAULT_ENCRYPT_DECRYPTED_FOLDER;
 	static constexpr bool DEFAULT_DELETE_DECRYPTED_FILES = BOOL_DEFAULT_DELETE_DECRYPTED_FILES;
-	// Конструкторы
+	// РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂС‹
 	VideoEncryptor();
 	VideoEncryptor(std::string key, std::string baseDirectory, std::string inputFolder, std::string encryptedFolder, std::string decryptedFolder, short shift);
 
-	// Геттеры
+	// Р“РµС‚С‚РµСЂС‹
 	std::string getKey() const { return key; }
 	std::string getBaseDirectory() const { return baseDirectory; }
 	std::string getInputFolder() const { return inputFolder; }
@@ -49,15 +49,15 @@ public:
 	bool getShouldEncryptDecryptedFolder() const { return shouldEncryptDecryptedFolder; }
 	bool getDeleteDecryptedFiles() const { return deleteDecryptedFiles; }
 
-	// Сеттеры
+	// РЎРµС‚С‚РµСЂС‹
 	void setShouldEncryptDecryptedFolder(bool value) { shouldEncryptDecryptedFolder = value; }
 	void setDeleteDecryptedFiles(bool value) { deleteDecryptedFiles = value; };
 
-	// Методы
+	// РњРµС‚РѕРґС‹
 	void encryptMp4() const;
 	void decryptMp4() const;
 private:
-	// Константы и параметры
+	// РљРѕРЅСЃС‚Р°РЅС‚С‹ Рё РїР°СЂР°РјРµС‚СЂС‹
 	static bool initialized;
 	const std::string key;
 	const std::string baseDirectory;
@@ -69,7 +69,7 @@ private:
 
 	bool shouldEncryptDecryptedFolder;
 	bool deleteDecryptedFiles;
-	// Функции-члены	
+	// Р¤СѓРЅРєС†РёРё-С‡Р»РµРЅС‹	
 	std::string encryptFilename(const std::string& filename, short shift = 1, short maxShift = 10) const;
 	std::vector<char> readPartialFile(const std::string& filePath, std::streamsize size) const;
 	void writePartialFile(const std::string& filePath, const std::vector<char>& data, std::streampos pos) const;
@@ -77,7 +77,7 @@ private:
 };
 
 
-namespace RCC { // Хранит функцию для циклического сдвига символов строки, при этом символы никогда не выйдут за пределы алфавита
+namespace RCC { // РҐСЂР°РЅРёС‚ С„СѓРЅРєС†РёСЋ РґР»СЏ С†РёРєР»РёС‡РµСЃРєРѕРіРѕ СЃРґРІРёРіР° СЃРёРјРІРѕР»РѕРІ СЃС‚СЂРѕРєРё, РїСЂРё СЌС‚РѕРј СЃРёРјРІРѕР»С‹ РЅРёРєРѕРіРґР° РЅРµ РІС‹Р№РґСѓС‚ Р·Р° РїСЂРµРґРµР»С‹ Р°Р»С„Р°РІРёС‚Р°
 	std::string encryptFilename(std::wstring filename, short shift = 1, short maxShift = 15);
 }
 #endif // VIDEO_ENCRYPTOR_H

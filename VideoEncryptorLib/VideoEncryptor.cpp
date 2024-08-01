@@ -1,8 +1,8 @@
-#include "pch.h"
+п»ї#include "pch.h"
 #include "VideoEncryptor.h"
 
 
-//// Инициализация статических констант
+//// РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ СЃС‚Р°С‚РёС‡РµСЃРєРёС… РєРѕРЅСЃС‚Р°РЅС‚
 const std::string VideoEncryptor::DEFAULT_KEY = STR_DEFAULT_KEY;
 const std::string VideoEncryptor::DEFAULT_BASE_DIRECTORY = STR_DEFAULT_BASE_DIRECTORY;
 const std::string VideoEncryptor::DEFAULT_INPUT_FOLDER = STR_DEFAULT_INPUT_FOLDER;
@@ -84,24 +84,24 @@ void VideoEncryptor::encryptMp4() const
 				fs::create_directories(encryptedDirectoryPath);
 			}
 			catch (const fs::filesystem_error& e) {
-				std::cerr << "Ошибка при создании директории: " << e.what() << std::endl;
+				std::cerr << "РћС€РёР±РєР° РїСЂРё СЃРѕР·РґР°РЅРёРё РґРёСЂРµРєС‚РѕСЂРёРё: " << e.what() << std::endl;
 				return;
 			}
 			catch (const std::exception& e) {
-				std::cerr << "Неизвестная ошибка при создании директории: " << e.what() << std::endl;
+				std::cerr << "РќРµРёР·РІРµСЃС‚РЅР°СЏ РѕС€РёР±РєР° РїСЂРё СЃРѕР·РґР°РЅРёРё РґРёСЂРµРєС‚РѕСЂРёРё: " << e.what() << std::endl;
 				return;
 			}
 
 			for (const auto& entry : fs::directory_iterator(directoryPath))
 			{
-				std::string failedFileName = "Не удалось получить название файла";
+				std::string failedFileName = "РќРµ СѓРґР°Р»РѕСЃСЊ РїРѕР»СѓС‡РёС‚СЊ РЅР°Р·РІР°РЅРёРµ С„Р°Р№Р»Р°";
 				try
 				{
 					if (entry.is_regular_file())
 					{
 						try {
 							std::string encryptingFilePath = entry.path().string();
-							std::cout << "Шифруется " << encryptingFilePath << ". . ." << std::endl;
+							std::cout << "РЁРёС„СЂСѓРµС‚СЃСЏ " << encryptingFilePath << ". . ." << std::endl;
 							std::string filename = failedFileName = entry.path().filename().string();
 							std::string encryptedFilePath = (std::filesystem::path(encryptedDirectoryPath) / encryptFilename(filename, shift)).string();
 
@@ -116,54 +116,54 @@ void VideoEncryptor::encryptMp4() const
 
 							// Write the encrypted chunk back to the new file
 							writePartialFile(encryptedFilePath, fileData, 0);
-							std::cout << "Файл успешно зашифрован и сохранен как " << encryptedFilePath << std::endl;
+							std::cout << "Р¤Р°Р№Р» СѓСЃРїРµС€РЅРѕ Р·Р°С€РёС„СЂРѕРІР°РЅ Рё СЃРѕС…СЂР°РЅРµРЅ РєР°Рє " << encryptedFilePath << std::endl;
 							// Delete the original file
 							if (fs::remove(encryptingFilePath)) {
-								std::cout << "Файл " << encryptingFilePath << " удален." << std::endl;
+								std::cout << "Р¤Р°Р№Р» " << encryptingFilePath << " СѓРґР°Р»РµРЅ." << std::endl;
 							}
 							else {
-								std::cerr << "ОШИБКА: Не удалось удалить исходный файл " << filename << std::endl;
+								std::cerr << "РћРЁРР‘РљРђ: РќРµ СѓРґР°Р»РѕСЃСЊ СѓРґР°Р»РёС‚СЊ РёСЃС…РѕРґРЅС‹Р№ С„Р°Р№Р» " << filename << std::endl;
 							}
 						}
 						catch (const fs::filesystem_error& e) {
-							std::cerr << "ОШИБКА файловой системы при обработке файла " << failedFileName << ": " << e.what() << std::endl;
+							std::cerr << "РћРЁРР‘РљРђ С„Р°Р№Р»РѕРІРѕР№ СЃРёСЃС‚РµРјС‹ РїСЂРё РѕР±СЂР°Р±РѕС‚РєРµ С„Р°Р№Р»Р° " << failedFileName << ": " << e.what() << std::endl;
 						}
 						catch (const std::ios_base::failure& e) {
-							std::cerr << "ОШИБКА ввода-вывода при обработке файла " << failedFileName << ": " << e.what() << std::endl;
+							std::cerr << "РћРЁРР‘РљРђ РІРІРѕРґР°-РІС‹РІРѕРґР° РїСЂРё РѕР±СЂР°Р±РѕС‚РєРµ С„Р°Р№Р»Р° " << failedFileName << ": " << e.what() << std::endl;
 						}
 						catch (const std::exception& e) {
-							std::cerr << "ОШИБКА при шифровании видео " << failedFileName << ": " << e.what() << std::endl;
+							std::cerr << "РћРЁРР‘РљРђ РїСЂРё С€РёС„СЂРѕРІР°РЅРёРё РІРёРґРµРѕ " << failedFileName << ": " << e.what() << std::endl;
 						}
 						catch (...) {
-							std::cerr << "Неизвестная ошибка при шифровании видео " << failedFileName << std::endl;
+							std::cerr << "РќРµРёР·РІРµСЃС‚РЅР°СЏ РѕС€РёР±РєР° РїСЂРё С€РёС„СЂРѕРІР°РЅРёРё РІРёРґРµРѕ " << failedFileName << std::endl;
 						}
 					}
 				}
 				catch (const std::exception& e)
 				{
-					std::cerr << "ОШИБКА при обработке директории для файла " << failedFileName << ": " << e.what() << std::endl;
+					std::cerr << "РћРЁРР‘РљРђ РїСЂРё РѕР±СЂР°Р±РѕС‚РєРµ РґРёСЂРµРєС‚РѕСЂРёРё РґР»СЏ С„Р°Р№Р»Р° " << failedFileName << ": " << e.what() << std::endl;
 				}
 				catch (...) {
-					std::cerr << "Неизвестная ошибка при обработке директории для файла " << failedFileName << std::endl;
+					std::cerr << "РќРµРёР·РІРµСЃС‚РЅР°СЏ РѕС€РёР±РєР° РїСЂРё РѕР±СЂР°Р±РѕС‚РєРµ РґРёСЂРµРєС‚РѕСЂРёРё РґР»СЏ С„Р°Р№Р»Р° " << failedFileName << std::endl;
 				}
 				std::cout << std::endl << std::endl;
 			}
 		};
 
 	try {
-		// Обработка файлов в основной директории
+		// РћР±СЂР°Р±РѕС‚РєР° С„Р°Р№Р»РѕРІ РІ РѕСЃРЅРѕРІРЅРѕР№ РґРёСЂРµРєС‚РѕСЂРёРё
 		encryptFilesInDirectory((std::filesystem::path(baseDirectory) / inputFolder).string());
 
-		// Обработка файлов в директории, куда восстанавливаются файлы
+		// РћР±СЂР°Р±РѕС‚РєР° С„Р°Р№Р»РѕРІ РІ РґРёСЂРµРєС‚РѕСЂРёРё, РєСѓРґР° РІРѕСЃСЃС‚Р°РЅР°РІР»РёРІР°СЋС‚СЃСЏ С„Р°Р№Р»С‹
 		if (VideoEncryptor::shouldEncryptDecryptedFolder) {
 			encryptFilesInDirectory((std::filesystem::path(baseDirectory) / decryptedFolder).string());
 		}
 	}
 	catch (const std::exception& e) {
-		std::cerr << "Ошибка при выполнении функции шифрования: " << e.what() << std::endl;
+		std::cerr << "РћС€РёР±РєР° РїСЂРё РІС‹РїРѕР»РЅРµРЅРёРё С„СѓРЅРєС†РёРё С€РёС„СЂРѕРІР°РЅРёСЏ: " << e.what() << std::endl;
 	}
 	catch (...) {
-		std::cerr << "Неизвестная ошибка при выполнении функции шифрования" << std::endl;
+		std::cerr << "РќРµРёР·РІРµСЃС‚РЅР°СЏ РѕС€РёР±РєР° РїСЂРё РІС‹РїРѕР»РЅРµРЅРёРё С„СѓРЅРєС†РёРё С€РёС„СЂРѕРІР°РЅРёСЏ" << std::endl;
 	}
 }
 
@@ -175,11 +175,11 @@ void VideoEncryptor::decryptMp4() const
 		fs::create_directories(decryptedDirectoryPath);
 	}
 	catch (const fs::filesystem_error& e) {
-		std::cerr << "Ошибка при создании директории: " << e.what() << std::endl;
+		std::cerr << "РћС€РёР±РєР° РїСЂРё СЃРѕР·РґР°РЅРёРё РґРёСЂРµРєС‚РѕСЂРёРё: " << e.what() << std::endl;
 		return;
 	}
 	catch (const std::exception& e) {
-		std::cerr << "Неизвестная ошибка при создании директории: " << e.what() << std::endl;
+		std::cerr << "РќРµРёР·РІРµСЃС‚РЅР°СЏ РѕС€РёР±РєР° РїСЂРё СЃРѕР·РґР°РЅРёРё РґРёСЂРµРєС‚РѕСЂРёРё: " << e.what() << std::endl;
 		return;
 	}
 
@@ -187,13 +187,13 @@ void VideoEncryptor::decryptMp4() const
 
 	for (const auto& entry : fs::directory_iterator(encryptedDirectoryPath))
 	{
-		std::string failedFileName = "Не удалось получить название файла";
+		std::string failedFileName = "РќРµ СѓРґР°Р»РѕСЃСЊ РїРѕР»СѓС‡РёС‚СЊ РЅР°Р·РІР°РЅРёРµ С„Р°Р№Р»Р°";
 		try {
 			if (entry.is_regular_file())
 			{
 				try {
 					std::string encryptedFilePath = entry.path().string();
-					std::cout << "Расшифровывается " << encryptedFilePath << ". . ." << std::endl;
+					std::cout << "Р Р°СЃС€РёС„СЂРѕРІС‹РІР°РµС‚СЃСЏ " << encryptedFilePath << ". . ." << std::endl;
 					std::string fileName = failedFileName = entry.path().filename().string();
 					std::string decryptedFilePath = (std::filesystem::path(decryptedDirectoryPath) / encryptFilename(fileName, -shift)).string();
 
@@ -209,37 +209,37 @@ void VideoEncryptor::decryptMp4() const
 					// Write the decrypted chunk back to the new file
 					writePartialFile(decryptedFilePath, encryptedData, 0);
 
-					std::cout << "Файл расшифрован и сохранен как " << decryptedFilePath << std::endl;
+					std::cout << "Р¤Р°Р№Р» СЂР°СЃС€РёС„СЂРѕРІР°РЅ Рё СЃРѕС…СЂР°РЅРµРЅ РєР°Рє " << decryptedFilePath << std::endl;
 
 					if (deleteDecryptedFiles) {
 						if (fs::remove(encryptedFilePath)) {
-							std::cout << "Файл " << fileName << " удален из " << encryptedDirectoryPath << std::endl;
+							std::cout << "Р¤Р°Р№Р» " << fileName << " СѓРґР°Р»РµРЅ РёР· " << encryptedDirectoryPath << std::endl;
 						}
 						else {
-							std::cerr << "Ошибка: Не удалось удалить исходный файл." << std::endl;
+							std::cerr << "РћС€РёР±РєР°: РќРµ СѓРґР°Р»РѕСЃСЊ СѓРґР°Р»РёС‚СЊ РёСЃС…РѕРґРЅС‹Р№ С„Р°Р№Р»." << std::endl;
 						}
 					}
 					//std::cout << std::endl;
 				}
 				catch (const fs::filesystem_error& e) {
-					std::cerr << "Ошибка файловой системы при обработке файла " << failedFileName << ": " << e.what() << std::endl;
+					std::cerr << "РћС€РёР±РєР° С„Р°Р№Р»РѕРІРѕР№ СЃРёСЃС‚РµРјС‹ РїСЂРё РѕР±СЂР°Р±РѕС‚РєРµ С„Р°Р№Р»Р° " << failedFileName << ": " << e.what() << std::endl;
 				}
 				catch (const std::ios_base::failure& e) {
-					std::cerr << "Ошибка ввода-вывода при обработке файла " << failedFileName << ": " << e.what() << std::endl;
+					std::cerr << "РћС€РёР±РєР° РІРІРѕРґР°-РІС‹РІРѕРґР° РїСЂРё РѕР±СЂР°Р±РѕС‚РєРµ С„Р°Р№Р»Р° " << failedFileName << ": " << e.what() << std::endl;
 				}
 				catch (const std::exception& e) {
-					std::cerr << "Ошибка при расшифровке видео " << failedFileName << ": " << e.what() << std::endl;
+					std::cerr << "РћС€РёР±РєР° РїСЂРё СЂР°СЃС€РёС„СЂРѕРІРєРµ РІРёРґРµРѕ " << failedFileName << ": " << e.what() << std::endl;
 				}
 				catch (...) {
-					std::cerr << "Неизвестная ошибка при расшифровке видео " << failedFileName << std::endl;
+					std::cerr << "РќРµРёР·РІРµСЃС‚РЅР°СЏ РѕС€РёР±РєР° РїСЂРё СЂР°СЃС€РёС„СЂРѕРІРєРµ РІРёРґРµРѕ " << failedFileName << std::endl;
 				}
 			}
 		}
 		catch (const std::exception& e) {
-			std::cerr << "Ошибка при обработке директории для файла " << failedFileName << ": " << e.what() << std::endl;
+			std::cerr << "РћС€РёР±РєР° РїСЂРё РѕР±СЂР°Р±РѕС‚РєРµ РґРёСЂРµРєС‚РѕСЂРёРё РґР»СЏ С„Р°Р№Р»Р° " << failedFileName << ": " << e.what() << std::endl;
 		}
 		catch (...) {
-			std::cerr << "Неизвестная ошибка при обработке директории для файла " << failedFileName << std::endl;
+			std::cerr << "РќРµРёР·РІРµСЃС‚РЅР°СЏ РѕС€РёР±РєР° РїСЂРё РѕР±СЂР°Р±РѕС‚РєРµ РґРёСЂРµРєС‚РѕСЂРёРё РґР»СЏ С„Р°Р№Р»Р° " << failedFileName << std::endl;
 		}
 		std::cout << std::endl;
 	}
