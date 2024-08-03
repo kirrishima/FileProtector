@@ -9,6 +9,7 @@ VideoEncryptorLib/x64
 /x64/
 FileProtector/opencv/*
 !FileProtector/opencv
+FileProtector/nlohmann/*
 HashingLib/OpenSSL/*
 !HashingLib/OpenSSL
 fd.py
