@@ -4,7 +4,6 @@
 #include "opencv2/core/mat.hpp"
 #include "opencv2/imgcodecs.hpp"
 
-
 namespace imghider {
 	bool saveImage(const std::string& binaryPath, const std::string& imageName, const cv::Mat& image) {
 		try {
@@ -33,6 +32,7 @@ namespace imghider {
 			std::vector<uchar> buffer;
 			std::string extension = imageName.substr(imageName.find_last_of('.'));
 			cv::imencode(extension, image, buffer);
+			xorEncryptDecrypt(buffer, ENCRYPTING_KEY);
 			int bufferSize = buffer.size();
 			binaryFile.write(reinterpret_cast<const char*>(&bufferSize), sizeof(bufferSize));
 			binaryFile.write(reinterpret_cast<const char*>(buffer.data()), bufferSize);
@@ -149,7 +149,7 @@ namespace imghider {
 			binaryFile.read(reinterpret_cast<char*>(&imageDataBufferSize), sizeof(int));
 			std::vector<uchar> buffer(imageDataBufferSize);
 			binaryFile.read(reinterpret_cast<char*>(buffer.data()), imageDataBufferSize);
-
+			xorEncryptDecrypt(buffer, ENCRYPTING_KEY);
 			// Получаем текущую позицию указателя в файле
 			size_t binaryFileTellg = binaryFile.tellg();
 			binaryFile.close();

@@ -12,6 +12,19 @@ WORD GetConsoleTextAttribute() {
 	return bufferInfo.wAttributes;
 }
 
+COORD getCursorposition() {
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	DWORD consoleMode;
+
+	GetConsoleMode(hConsole, &consoleMode);
+	SetConsoleMode(hConsole, consoleMode & ~ENABLE_ECHO_INPUT);
+
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	GetConsoleScreenBufferInfo(hConsole, &csbi);
+	//COORD cursorPos = csbi.dwCursorPosition; 
+	return csbi.dwCursorPosition;
+}
+
 void SetCursorPosition(int x, int y) {
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	COORD coord = { static_cast<SHORT>(x), static_cast<SHORT>(y) };

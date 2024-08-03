@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="config.cpp" />
     <ClCompile Include="file_operations.cpp" />
     <ClCompile Include="hash_operations.cpp" />
     <ClCompile Include="image_display.cpp" />
@@ -33,6 +34,7 @@
     <ClCompile Include="utils.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="config.h" />
     <ClInclude Include="imghider.h" />
     <ClInclude Include="console.h" />
     <ClInclude Include="resource.h" />
@@ -97,7 +99,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>../HashingLib;../VideoEncryptorLib;opencv\build\install\include;$(IncludePath)</IncludePath>
+    <IncludePath>../HashingLib;../VideoEncryptorLib;opencv\build\install\include;nlohmann;$(IncludePath)</IncludePath>
     <LibraryPath>..\x64\Debug;opencv\build\install\x64\vc17\staticlib;..\HashingLib\OpenSSL\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

@@ -1,7 +1,6 @@
 ﻿#include "pch.h"
 #include "VideoEncryptor.h"
 
-
 //// Инициализация статических констант
 const std::string VideoEncryptor::DEFAULT_KEY = STR_DEFAULT_KEY;
 const std::string VideoEncryptor::DEFAULT_BASE_DIRECTORY = STR_DEFAULT_BASE_DIRECTORY;
@@ -10,13 +9,11 @@ const std::string VideoEncryptor::DEFAULT_ENCRYPTED_FOLDER = STR_DEFAULT_ENCRYPT
 const std::string VideoEncryptor::DEFAULT_DECRYPTED_FOLDER = STR_DEFAULT_DECRYPTED_FOLDER;
 
 VideoEncryptor::VideoEncryptor()
-	: key(DEFAULT_KEY), baseDirectory(DEFAULT_BASE_DIRECTORY),
-	inputFolder(DEFAULT_INPUT_FOLDER), encryptedFolder(DEFAULT_ENCRYPTED_FOLDER),
-	decryptedFolder(DEFAULT_DECRYPTED_FOLDER), shift(DEFAULT_SHIFT),
-	chunkSize(1024 * 1024), shouldEncryptDecryptedFolder(DEFAULT_ENCRYPT_DECRYPTED_FOLDER),
-	deleteDecryptedFiles(DEFAULT_DELETE_DECRYPTED_FILES) {
-
-}
+	: key(STR_DEFAULT_KEY), baseDirectory(STR_DEFAULT_BASE_DIRECTORY),
+	inputFolder(STR_DEFAULT_INPUT_FOLDER), encryptedFolder(STR_DEFAULT_ENCRYPTED_FOLDER),
+	decryptedFolder(STR_DEFAULT_DECRYPTED_FOLDER), shift(INT_DEFAULT_SHIFT),
+	chunkSize(INT_DEFAULT_CHUNK_SIZE), shouldEncryptDecryptedFolder(BOOL_DEFAULT_SHOULD_ENCRYPT_DECRYPTED_FOLDER),
+	deleteDecryptedFiles(BOOL_DEFAULT_SHOULD_DELETE_DECRYPTED_FILES) {}
 
 VideoEncryptor::VideoEncryptor(std::string key, std::string baseDirectory, std::string inputFolder, std::string encryptedFolder, std::string decryptedFolder, short shift)
 	: key(std::move(key)),
@@ -25,9 +22,8 @@ VideoEncryptor::VideoEncryptor(std::string key, std::string baseDirectory, std::
 	encryptedFolder(std::move(encryptedFolder)),
 	decryptedFolder(std::move(decryptedFolder)),
 	shift(shift),
-	chunkSize(1024 * 1024)
+	chunkSize(INT_DEFAULT_CHUNK_SIZE)
 {
-
 	this->shouldEncryptDecryptedFolder = DEFAULT_ENCRYPT_DECRYPTED_FOLDER;
 	this->deleteDecryptedFiles = DEFAULT_DELETE_DECRYPTED_FILES;
 }

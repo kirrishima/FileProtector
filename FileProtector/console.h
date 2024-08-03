@@ -4,7 +4,7 @@
 #include <string>
 
 
-#define ALL_CODES 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);\
+#define PRINT_ALL_CODES_AND_COLORS 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);\
 for (int codeId = 0; codeId < 255; codeId++)\
 {\
 	SetConsoleTextAttribute(hConsole, k);\
@@ -56,20 +56,9 @@ extern void SetConsoleColor(int color);
 extern WORD GetConsoleTextAttribute();
 extern void SetCursorPosition(int x, int y);
 
-#define CONSOLE_CURSOR_SHORTCUT HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE); \
-DWORD consoleMode; \
-\
-GetConsoleMode(hConsole, &consoleMode); \
-SetConsoleMode(hConsole, consoleMode & ~ENABLE_ECHO_INPUT); \
-\
-CONSOLE_SCREEN_BUFFER_INFO csbi; \
-GetConsoleScreenBufferInfo(hConsole, &csbi); \
-COORD cursorPos = csbi.dwCursorPosition; \
-
-
-
 static WORD defaultAttributes = GetConsoleTextAttribute();
 
+COORD getCursorposition();
 /**
  * @brief Выводит цветную строку на экран
  *

@@ -6,12 +6,12 @@
 #include <opencv2/imgproc.hpp>
 #include <string>
 #include <vector>
+#include "config.h"
 
 namespace fs = std::filesystem;
 
 namespace imghider {
 
-	static const short RCC_Shift = 3;
 
 	/**
 	*@brief Выводит изображение на экран
@@ -151,5 +151,11 @@ namespace imghider {
 		((combinedPath /= paths), ...);
 		return combinedPath.string();
 	}
+
+	void xorEncryptDecrypt(std::vector<uchar>& data, const std::string& key);
+
+
+		// Функция для проверки валидности имени файла
+	bool isValidFileName(const std::string& fileName);
 }
 #endif // !IMGHIDER_H

@@ -5,22 +5,16 @@
 #include <iomanip>
 #include <limits>
 
-
 namespace fs = std::filesystem;
 
 namespace imghider {
+	// Набор недопустимых символов для имени файла
+	static const std::string invalidChars = "\\/:*?\"<>|";
 
-	namespace {
-		// Набор недопустимых символов для имени файла
-		const std::string invalidChars = "\\/:*?\"<>|";
-
-		// Функция для проверки валидности имени файла
-		bool isValidFileName(const std::string& fileName) {
-			// Используем std::find_first_of для поиска любого из недопустимых символов
-			return std::find_first_of(fileName.begin(), fileName.end(), invalidChars.begin(), invalidChars.end()) == fileName.end();
-		}
+	bool isValidFileName(const std::string& fileName) {
+		// Используем std::find_first_of для поиска любого из недопустимых символов
+		return std::find_first_of(fileName.begin(), fileName.end(), invalidChars.begin(), invalidChars.end()) == fileName.end();
 	}
-
 	std::string getUniqueFilename(const std::string& originalFilename) {
 		try {
 			std::string extension = originalFilename.substr(originalFilename.find_last_of('.'));
@@ -166,5 +160,13 @@ namespace imghider {
 		return "";
 	}
 
-
+	void xorEncryptDecrypt(std::vector<uchar>& data, const std::string& key)
+	{
+		size_t keyLen = key.size();
+		size_t dataLen = data.size() < DEFAULT_CHUNK_SIZE ? data.size() : DEFAULT_CHUNK_SIZE;
+		for (size_t i = 0; i < dataLen; ++i)
+		{
+			data[i] ^= key[i % keyLen];
+		}
+	}
 } //imghider

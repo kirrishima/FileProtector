@@ -1,23 +1,23 @@
-﻿
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "regex"
 #include <limits>
 //#include "VideoEncryptor.h"
 //#include "imghider.h"
 
-std::unique_ptr<VideoEncryptor> VE = std::make_unique<VideoEncryptor>("Force_AKA_Moonglow_Qpro_I_Love_Sadar_baby_Goat", "VIDS", "Input", "Corrupted", "Fixed", 4);
+std::unique_ptr<VideoEncryptor> VE;
 
-const std::string imagesBaseDirectory = "IMG";
-const std::string imagesSaveFromPath = (std::filesystem::path(imagesBaseDirectory) / "Upload").string();
-const std::string imagesSaveToPath = (std::filesystem::path(imagesBaseDirectory) / "Saves").string();
-const std::string binaryPath = (std::filesystem::path(imagesSaveToPath) / "data.bin").string();
-const std::string imagesRecoveredDirectory = (std::filesystem::path(imagesBaseDirectory) / "Recovered").string();
-const std::string hashFilePath = (std::filesystem::path(imagesSaveToPath) / "hash.txt").string();
+// Инициализация констант
+std::string imagesBaseDirectory;
+std::string imagesSaveFromPath;
+std::string imagesSaveToPath;
+std::string binaryPath;
+std::string imagesRecoveredDirectory;
+std::string hashFilePath;
 
-const std::string videoBaseDirectory = VE->getBaseDirectory();
-const std::string videoInputPath = (std::filesystem::path(videoBaseDirectory) / VE->getInputFolder()).string();
-const std::string videoEncryptedPath = (std::filesystem::path(videoBaseDirectory) / VE->getEncryptedFolder()).string();
-const std::string videoRecoveredDirectory = (std::filesystem::path(videoBaseDirectory) / VE->getDecryptedFolder()).string();
+std::string videoBaseDirectory;
+std::string videoInputPath;
+std::string videoEncryptedPath;
+std::string videoRecoveredDirectory;
 
 int ConsoleDefaultHeight = GetConsoleWindowHeight();
 #define DISABLE_PSWD
@@ -46,6 +46,37 @@ void showDeletionMenu();
 void handleUserInput(char userInput, const std::vector<std::string>& paths);
 void printHelp();
 
+void configureFromJson() {
+	json config = ConfigHandler::loadConfig(ConfigHandler::defaultConfigFilePath);
+	// Прямой доступ к значениям конфигурации
+	const json& paths = config["Paths"];
+	const json& files = config["Files"];
+
+	imagesBaseDirectory = paths["images_base_directory"].get<std::string>();
+	imagesSaveFromPath = (std::filesystem::path(imagesBaseDirectory) / paths["images_save_from_path"].get<std::string>()).string();
+	imagesSaveToPath = (std::filesystem::path(imagesBaseDirectory) / paths["images_save_to_path"].get<std::string>()).string();
+	imagesRecoveredDirectory = (std::filesystem::path(imagesBaseDirectory) / paths["images_recovered_directory"].get<std::string>()).string();
+
+	binaryPath = (std::filesystem::path(imagesSaveToPath) / files["binary_path"].get<std::string>()).string();
+	hashFilePath = (std::filesystem::path(imagesSaveToPath) / files["hash_file_path"].get<std::string>()).string();
+
+	// Настройка VideoEncryptor
+	VE = std::make_unique<VideoEncryptor>(
+		imghider::ENCRYPTING_KEY,
+		paths["video_base_directory"].get<std::string>(),
+		paths["video_input_directory"].get<std::string>(),
+		paths["video_encrypted_directory"].get<std::string>(),
+		paths["video_recovered_directory"].get<std::string>(),
+		imghider::RCC_Shift
+	);
+
+	// Получение путей из VideoEncryptor
+	videoBaseDirectory = VE->getBaseDirectory();
+	videoInputPath = (std::filesystem::path(videoBaseDirectory) / VE->getInputFolder()).string();
+	videoEncryptedPath = (std::filesystem::path(videoBaseDirectory) / VE->getEncryptedFolder()).string();
+	videoRecoveredDirectory = (std::filesystem::path(videoBaseDirectory) / VE->getDecryptedFolder()).string();
+
+}
 
 int main() {
 	ResizeConsole(36, 120, 10000, 120);
@@ -55,14 +86,16 @@ int main() {
 	//SetConsoleOutputCP(1251);
 	//SetConsoleCP(1251);
 
-
+	COORD cursorPos = getCursorposition();
 	if (!authenticateUser()) {
 		return 1;
 	}
 
-	//SetCursorPosition(0, cursorPos.Y);
-	SetCursorPosition(0, 0);
-	printColoredMessage("НЕ УДАЛЯЙТЕ ПАПКИ " + binaryPath + " И " + videoEncryptedPath + " И ИХ СОДЕРЖИМОЕ ВО ИЗБЕЖАНИЕ ПОТЕРИ ИНФОРМАЦИИ\n", CONSOLE_RED);
+	SetCursorPosition(0, cursorPos.Y);
+	//SetCursorPosition(0, 0);
+
+	configureFromJson();
+	printColoredMessage("\nНЕ УДАЛЯЙТЕ ПАПКИ " + binaryPath + " И " + videoEncryptedPath + " И ИХ СОДЕРЖИМОЕ ВО ИЗБЕЖАНИЕ ПОТЕРИ ИНФОРМАЦИИ\n", CONSOLE_RED);
 
 	std::vector<std::string> paths = { imagesSaveFromPath, imagesSaveToPath, binaryPath, imagesRecoveredDirectory, hashFilePath,
 		videoInputPath, videoEncryptedPath, videoRecoveredDirectory };

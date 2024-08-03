@@ -17,10 +17,10 @@ namespace fs = std::filesystem;
 #define STR_DEFAULT_INPUT_FOLDER "Input"
 #define STR_DEFAULT_ENCRYPTED_FOLDER "Corrupted"
 #define STR_DEFAULT_DECRYPTED_FOLDER "Pure"
-#define INT_DEFAULT_SHIFT 0
+#define INT_DEFAULT_SHIFT 1
 #define INT_DEFAULT_CHUNK_SIZE 1024 * 1024
-#define BOOL_DEFAULT_ENCRYPT_DECRYPTED_FOLDER false
-#define BOOL_DEFAULT_DELETE_DECRYPTED_FILES false
+#define BOOL_DEFAULT_SHOULD_ENCRYPT_DECRYPTED_FOLDER false
+#define BOOL_DEFAULT_SHOULD_DELETE_DECRYPTED_FILES false
 
 class VideoEncryptor
 {
@@ -33,8 +33,8 @@ public:
 	static const std::string DEFAULT_ENCRYPTED_FOLDER;
 	static const std::string DEFAULT_DECRYPTED_FOLDER;
 	static constexpr int DEFAULT_SHIFT = INT_DEFAULT_SHIFT;
-	static constexpr bool DEFAULT_ENCRYPT_DECRYPTED_FOLDER = BOOL_DEFAULT_ENCRYPT_DECRYPTED_FOLDER;
-	static constexpr bool DEFAULT_DELETE_DECRYPTED_FILES = BOOL_DEFAULT_DELETE_DECRYPTED_FILES;
+	static constexpr bool DEFAULT_ENCRYPT_DECRYPTED_FOLDER = BOOL_DEFAULT_SHOULD_ENCRYPT_DECRYPTED_FOLDER;
+	static constexpr bool DEFAULT_DELETE_DECRYPTED_FILES = BOOL_DEFAULT_SHOULD_DELETE_DECRYPTED_FILES;
 	// Конструкторы
 	VideoEncryptor();
 	VideoEncryptor(std::string key, std::string baseDirectory, std::string inputFolder, std::string encryptedFolder, std::string decryptedFolder, short shift);
