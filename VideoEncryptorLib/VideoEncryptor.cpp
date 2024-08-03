@@ -1,7 +1,8 @@
 ﻿#include "pch.h"
 #include "VideoEncryptor.h"
 
-//// Инициализация статических констант
+namespace fs = std::filesystem;
+
 const std::string VideoEncryptor::DEFAULT_KEY = STR_DEFAULT_KEY;
 const std::string VideoEncryptor::DEFAULT_BASE_DIRECTORY = STR_DEFAULT_BASE_DIRECTORY;
 const std::string VideoEncryptor::DEFAULT_INPUT_FOLDER = STR_DEFAULT_INPUT_FOLDER;
@@ -74,7 +75,7 @@ void VideoEncryptor::encryptMp4() const
 {
 	auto encryptFilesInDirectory = [&](const std::string& directoryPath)
 		{
-			std::string encryptedDirectoryPath = (std::filesystem::path(baseDirectory) / encryptedFolder).string();
+			std::string encryptedDirectoryPath = (fs::path(baseDirectory) / encryptedFolder).string();
 
 			try {
 				fs::create_directories(encryptedDirectoryPath);
@@ -99,7 +100,7 @@ void VideoEncryptor::encryptMp4() const
 							std::string encryptingFilePath = entry.path().string();
 							std::cout << "Шифруется " << encryptingFilePath << ". . ." << std::endl;
 							std::string filename = failedFileName = entry.path().filename().string();
-							std::string encryptedFilePath = (std::filesystem::path(encryptedDirectoryPath) / encryptFilename(filename, shift)).string();
+							std::string encryptedFilePath = (fs::path(encryptedDirectoryPath) / encryptFilename(filename, shift)).string();
 
 							// Read the first 1 MB of the input file
 							std::vector<char> fileData = readPartialFile(encryptingFilePath, chunkSize);
@@ -148,11 +149,11 @@ void VideoEncryptor::encryptMp4() const
 
 	try {
 		// Обработка файлов в основной директории
-		encryptFilesInDirectory((std::filesystem::path(baseDirectory) / inputFolder).string());
+		encryptFilesInDirectory((fs::path(baseDirectory) / inputFolder).string());
 
 		// Обработка файлов в директории, куда восстанавливаются файлы
 		if (VideoEncryptor::shouldEncryptDecryptedFolder) {
-			encryptFilesInDirectory((std::filesystem::path(baseDirectory) / decryptedFolder).string());
+			encryptFilesInDirectory((fs::path(baseDirectory) / decryptedFolder).string());
 		}
 	}
 	catch (const std::exception& e) {
@@ -166,7 +167,7 @@ void VideoEncryptor::encryptMp4() const
 
 void VideoEncryptor::decryptMp4() const
 {
-	std::string decryptedDirectoryPath = (std::filesystem::path(baseDirectory) / decryptedFolder).string();
+	std::string decryptedDirectoryPath = (fs::path(baseDirectory) / decryptedFolder).string();
 	try {
 		fs::create_directories(decryptedDirectoryPath);
 	}
@@ -179,7 +180,7 @@ void VideoEncryptor::decryptMp4() const
 		return;
 	}
 
-	std::string encryptedDirectoryPath = (std::filesystem::path(baseDirectory) / encryptedFolder).string();
+	std::string encryptedDirectoryPath = (fs::path(baseDirectory) / encryptedFolder).string();
 
 	for (const auto& entry : fs::directory_iterator(encryptedDirectoryPath))
 	{
@@ -191,7 +192,7 @@ void VideoEncryptor::decryptMp4() const
 					std::string encryptedFilePath = entry.path().string();
 					std::cout << "Расшифровывается " << encryptedFilePath << ". . ." << std::endl;
 					std::string fileName = failedFileName = entry.path().filename().string();
-					std::string decryptedFilePath = (std::filesystem::path(decryptedDirectoryPath) / encryptFilename(fileName, -shift)).string();
+					std::string decryptedFilePath = (fs::path(decryptedDirectoryPath) / encryptFilename(fileName, -shift)).string();
 
 					// Read the first 1 MB of the encrypted file
 					std::vector<char> encryptedData = readPartialFile(encryptedFilePath, chunkSize);
