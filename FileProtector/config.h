@@ -14,13 +14,13 @@ namespace imghider
 	static const std::string ENCRYPTING_KEY = "Force_AKA_Moonglow_Qpro_I_Love_Sadar_baby_Goat";
 }
 
+static const std::string PASSWORD = "735812";
 
 using json = nlohmann::json;
 
 class ConfigHandler {
 public:
     static const std::string defaultConfigFilePath;
-
     static json getDefaultConfig();
     static bool validateConfig(const json& config);
     static void createDefaultConfigFile(const std::string& filePath);
