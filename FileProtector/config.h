@@ -9,12 +9,12 @@
 
 namespace imghider
 {
-	static const short RCC_Shift = 3;
-	static constexpr int DEFAULT_CHUNK_SIZE = 1024 * 1024;
-	static const std::string ENCRYPTING_KEY = "Force_AKA_Moonglow_Qpro_I_Love_Sadar_baby_Goat";
+	static const short RCC_Shift = 1; // File Name Encrypting Start Shift
+	static constexpr int DEFAULT_CHUNK_SIZE = 1024 * 1024; // Size in bytes of the file to be encoded, 1 MB By default
+	static const std::string ENCRYPTING_KEY = "Enter_YOUR_Key_Which_Will_Be_Used_In_Encrypring";
 }
 
-static const std::string PASSWORD = "735812";
+static const std::string PASSWORD = ""; // Spicify your password
 
 using json = nlohmann::json;
 
