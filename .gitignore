@@ -14,3 +14,4 @@ HashingLib/OpenSSL/*
 fd.py
 sasa.py
 *.exe
+config.json
