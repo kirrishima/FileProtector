@@ -1,10 +1,8 @@
 ﻿#include "stdafx.h"
 #include "regex"
 #include <limits>
-//#include "VideoEncryptor.h"
-//#include "imghider.h"
 
-std::unique_ptr<VideoEncryptor> VE;
+//#define DISABLE_PSWD
 
 // Инициализация констант
 std::string imagesBaseDirectory;
@@ -19,14 +17,17 @@ std::string videoInputPath;
 std::string videoEncryptedPath;
 std::string videoRecoveredDirectory;
 
-int ConsoleDefaultHeight = GetConsoleWindowHeight();
-#define DISABLE_PSWD
+std::vector<std::string> paths;
+std::unique_ptr<VideoEncryptor> VE;
+static const int ConsoleDefaultHeight = GetConsoleWindowHeight();
+
+
 bool authenticateUser() {
 #ifndef DISABLE_PSWD
 	std::cout << "Введите пароль: ";
 	std::string pswd;
 	std::getline(std::cin, pswd);
-	if (pswd != "735812") {
+	if (pswd != PASSWORD) {
 
 		std::cout << "Добро пожаловать!\nТекущий пароль:\nСписок просмотра:\nhttps://open.spotify.com/track/5ucIAerBlXCrES9RNEGNzH?si=30a9324a1cd34b31\n";
 		system("pause");
@@ -43,7 +44,7 @@ void initializeDirectories(const std::vector<std::string>& paths, bool verbose =
 
 void displayMainMenu();
 void showDeletionMenu();
-void handleUserInput(char userInput, const std::vector<std::string>& paths);
+void handleUserInput(char userInput);
 void printHelp();
 
 void configureFromJson() {
@@ -76,6 +77,8 @@ void configureFromJson() {
 	videoEncryptedPath = (std::filesystem::path(videoBaseDirectory) / VE->getEncryptedFolder()).string();
 	videoRecoveredDirectory = (std::filesystem::path(videoBaseDirectory) / VE->getDecryptedFolder()).string();
 
+	::paths = { imagesSaveFromPath, imagesSaveToPath, binaryPath, imagesRecoveredDirectory, hashFilePath,
+		videoInputPath, videoEncryptedPath, videoRecoveredDirectory };
 }
 
 int main() {
@@ -97,9 +100,6 @@ int main() {
 	configureFromJson();
 	printColoredMessage("\nНЕ УДАЛЯЙТЕ ПАПКИ " + binaryPath + " И " + videoEncryptedPath + " И ИХ СОДЕРЖИМОЕ ВО ИЗБЕЖАНИЕ ПОТЕРИ ИНФОРМАЦИИ\n", CONSOLE_RED);
 
-	std::vector<std::string> paths = { imagesSaveFromPath, imagesSaveToPath, binaryPath, imagesRecoveredDirectory, hashFilePath,
-		videoInputPath, videoEncryptedPath, videoRecoveredDirectory };
-
 	initializeDirectories(paths);
 
 	uchar userInput;
@@ -108,14 +108,14 @@ int main() {
 		displayMainMenu();
 		std::cin >> userInput;
 		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-		handleUserInput(userInput, paths);
+		handleUserInput(userInput);
 	} while (true);
 
 	system("pause");
 	return 0;
 }
 
-void handleUserInput(char userInput, const std::vector<std::string>& paths) {
+void handleUserInput(char userInput) {
 	switch (userInput) {
 	case '1':
 		std::cout << "\n";
@@ -142,6 +142,12 @@ void handleUserInput(char userInput, const std::vector<std::string>& paths) {
 		showDeletionMenu();
 		break;
 	case '8':
+		configureFromJson();
+		break;
+	case '9':
+		ConfigHandler::createDefaultConfigFile(ConfigHandler::defaultConfigFilePath);
+		break;
+	case 'h':
 		printHelp();
 		break;
 	case '0':
@@ -153,46 +159,21 @@ void handleUserInput(char userInput, const std::vector<std::string>& paths) {
 	}
 }
 
-void printHelp() {
-	std::cout << "\n\n";
-	printCentered("Программа для шифрования и сокрытия изображений и видео.\n", CONSOLE_GREEN);
 
-	printColoredMessage("Эта программа позволяет вам:", CONSOLE_DARK_CYAN);
-	std::cout << "1. Сохранить изображения в бинарный файл." << std::endl;
-	std::cout << "2. Загрузить изображения из бинарного файла." << std::endl;
-	std::cout << "3. Зашифровать и расшифровать видеофайлы." << std::endl;
-	std::cout << "4. Удалять файлы и папки, связанные с процессом шифрования и сокрытия." << std::endl;
-	std::cout << std::endl;
-
-	printColoredMessage("Используемые пути и папки:", CONSOLE_DARK_CYAN);
-
-	printColoredMessage("\nДля изображений:", CONSOLE_DARK_YELLOW);
-	std::cout << " - Каталог для загрузки изображений: " << imagesSaveFromPath << std::endl;
-	std::cout << " - Каталог для сохранения изображений в бинарном формате: " << binaryPath << std::endl;
-	std::cout << " - Каталог для восстановления изображений: " << imagesRecoveredDirectory << std::endl;
-	std::cout << " - Каталог для сохранения хэша изображений: " << hashFilePath << std::endl;
-	printColoredMessage("\nДля видео:", CONSOLE_DARK_YELLOW);
-	std::cout << " - Каталог для входных видеофайлов: " << videoInputPath << std::endl;
-	std::cout << " - Каталог для сохранения зашифрованных видеофайлов: " << videoEncryptedPath << std::endl;
-	std::cout << " - Каталог для восстановления расшифрованных видеофайлов: " << videoRecoveredDirectory << std::endl;
-	std::cout << std::endl;
-
-	printColoredMessage("Как пользоваться:", CONSOLE_DARK_CYAN);
-
-	std::cout << " - Необходимо ввести число или символ, отражающее определенный номер одного из пунктов меню" << std::endl;
-	std::cout << std::endl;
-
-	printColoredMessage("Внимание:", CONSOLE_DARK_RED);
-	std::cout << " - Данные из " << binaryPath << " не удаляются при восстановлении изображений, поэтому повторно шифровать восстановленные изображения не нужно\n";
-	std::cout << " - Зашифрованные видеофайлы из " << videoEncryptedPath << " не удаляются при расшифровании, поэтому повторно шифровать их также не нужно\n";
-	std::cout << " - При выборе 6 пункта главного меню - включение шифрования видео из папки с расшифрованными видео - данная настройка действует только в этот раз и не будет сохранена для последующих запусков\n";
-	std::cout << " - Удаление папок и файлов необратимо. Будьте осторожны при выборе соответствующих пунктов меню." << std::endl;
-	std::cout << " - Не удаляйте папки, содержащие важные файлы, такие как: " << binaryPath << " и " << videoEncryptedPath << " во избежание потери сохранённых данных." << std::endl;
-	std::cout << std::endl;
-
-	SET_CONSOLE_DARK_CYAN;
-	system("pause");
-	SET_CONSOLE_DEFAULT;
+void displayMainMenu() {
+	printColoredMessage("\nГлавное меню:", CONSOLE_CYAN);
+	std::cout << "0, q - выход\n";
+	std::cout << "1) Создать все необходимые папки и файлы\n";
+	std::cout << "2) Сохранить изображения из " << imagesSaveFromPath << std::endl;
+	std::cout << "3) Загрузить сохраненные изображения из " << binaryPath << std::endl;
+	std::cout << "4) Зашифровать видео из " << videoInputPath << std::endl;
+	std::cout << "5) Расшифровать видео из " << videoEncryptedPath << std::endl;
+	std::cout << "6) Также шифровать расшифрованные файлы из " << videoInputPath << " при выборе 4 пункта и сохранить в " << videoEncryptedPath << " (по умолчанию они НЕ ШИФРУЮТСЯ, зашифрованные файлы при расшифровке не удаляются!!)" << std::endl;
+	std::cout << "7) Меню удаления файлов и папок\n";
+	std::cout << "8) Перезагрузить файл конфигурации\n";
+	std::cout << "9) Пересоздать файл конфигурации\n";
+	std::cout << "h) Справка по программе\n";
+	printColoredMessage("\nВведите ваш выбор: ", CONSOLE_BLUE, "");
 }
 
 void showDeletionMenu() {
@@ -323,16 +304,44 @@ void showDeletionMenu() {
 	printColoredMessage("\nВозврат в главное меню. . .", CONSOLE_CYAN);
 }
 
-void displayMainMenu() {
-	printColoredMessage("\nГлавное меню:", CONSOLE_CYAN);
-	std::cout << "0, q - выход\n";
-	std::cout << "1) Создать все необходимые папки и файлы\n";
-	std::cout << "2) Сохранить изображения из " << imagesSaveFromPath << std::endl;
-	std::cout << "3) Загрузить сохраненные изображения из " << binaryPath << std::endl;
-	std::cout << "4) Зашифровать видео из " << videoInputPath << std::endl;
-	std::cout << "5) Расшифровать видео из " << videoEncryptedPath << std::endl;
-	std::cout << "6) Также шифровать расшифрованные файлы из " << videoInputPath << " при выборе 4 пункта и сохранить в " << videoEncryptedPath << " (по умолчанию они НЕ ШИФРУЮТСЯ, зашифрованные файлы при расшифровке не удаляются!!)" << std::endl;
-	std::cout << "7) Меню удаления файлов и папок\n";
-	std::cout << "8) Справка по программе\n";
-	printColoredMessage("\nВведите ваш выбор: ", CONSOLE_BLUE, "");
+void printHelp() {
+	std::cout << "\n\n";
+	printCentered("Программа для шифрования и сокрытия изображений и видео.\n", CONSOLE_GREEN);
+
+	printColoredMessage("Эта программа позволяет вам:", CONSOLE_DARK_CYAN);
+	std::cout << "1. Сохранить изображения в бинарный файл." << std::endl;
+	std::cout << "2. Загрузить изображения из бинарного файла." << std::endl;
+	std::cout << "3. Зашифровать и расшифровать видеофайлы." << std::endl;
+	std::cout << "4. Удалять файлы и папки, связанные с процессом шифрования и сокрытия." << std::endl;
+	std::cout << std::endl;
+
+	printColoredMessage("Используемые пути и папки (задаются в config.json):", CONSOLE_DARK_CYAN);
+
+	printColoredMessage("\nДля изображений:", CONSOLE_DARK_YELLOW);
+	std::cout << " - Каталог для загрузки изображений: " << imagesSaveFromPath << std::endl;
+	std::cout << " - Каталог для сохранения изображений в бинарном формате: " << binaryPath << std::endl;
+	std::cout << " - Каталог для восстановления изображений: " << imagesRecoveredDirectory << std::endl;
+	std::cout << " - Каталог для сохранения хэша изображений: " << hashFilePath << std::endl;
+	printColoredMessage("\nДля видео:", CONSOLE_DARK_YELLOW);
+	std::cout << " - Каталог для входных видеофайлов: " << videoInputPath << std::endl;
+	std::cout << " - Каталог для сохранения зашифрованных видеофайлов: " << videoEncryptedPath << std::endl;
+	std::cout << " - Каталог для восстановления расшифрованных видеофайлов: " << videoRecoveredDirectory << std::endl;
+	std::cout << std::endl;
+
+	printColoredMessage("Как пользоваться:", CONSOLE_DARK_CYAN);
+
+	std::cout << " - Необходимо ввести число или символ, отражающее определенный номер одного из пунктов меню" << std::endl;
+	std::cout << std::endl;
+
+	printColoredMessage("Внимание:", CONSOLE_DARK_RED);
+	std::cout << " - Данные из " << binaryPath << " не удаляются при восстановлении изображений, поэтому повторно шифровать восстановленные изображения не нужно\n";
+	std::cout << " - Зашифрованные видеофайлы из " << videoEncryptedPath << " не удаляются при расшифровании, поэтому повторно шифровать их также не нужно\n";
+	std::cout << " - При выборе 6 пункта главного меню - включение шифрования видео из папки с расшифрованными видео - данная настройка действует только в этот раз и не будет сохранена для последующих запусков\n";
+	std::cout << " - Удаление папок и файлов необратимо. Будьте осторожны при выборе соответствующих пунктов меню." << std::endl;
+	std::cout << " - Не удаляйте папки, содержащие важные файлы, такие как: " << binaryPath << " и " << videoEncryptedPath << " во избежание потери сохранённых данных." << std::endl;
+	std::cout << std::endl;
+
+	SET_CONSOLE_DARK_CYAN;
+	system("pause");
+	SET_CONSOLE_DEFAULT;
 }
