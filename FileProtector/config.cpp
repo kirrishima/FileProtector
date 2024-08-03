@@ -31,7 +31,7 @@ void ConfigHandler::createDefaultConfigFile(const std::string& filePath) {
 	if (configFile.is_open()) {
 		configFile << defaultConfig.dump(4); // Запись с отступами для удобства чтения
 		configFile.close();
-		printColoredMessage("Конфигурационный файл был создан в: " + filePath, CONSOLE_GREEN);
+		printColoredMessage("Конфигурационный файл был создан в: " + std::filesystem::absolute(filePath).string(), CONSOLE_GREEN);
 	}
 	else {
 		printColoredMessage("Ошибка: Не удалось создать конфигурационный файл!", CONSOLE_DARK_RED);
@@ -55,10 +55,12 @@ json ConfigHandler::loadConfig(const std::string& filePath) {
 		}
 		catch (const nlohmann::json::parse_error& e) {
 			printColoredMessage(std::format("JSON parse error: {}", e.what()), CONSOLE_DARK_RED);
+			printColoredMessage("Используются настройки по умолчанию.", CONSOLE_DARK_YELLOW);
 			return getDefaultConfig();
 		}
 		catch (const std::exception& e) {
 			printColoredMessage(std::format("Произошла неизвестная ошибка: {}", e.what()), CONSOLE_DARK_RED);
+			printColoredMessage("Используются настройки по умолчанию.", CONSOLE_DARK_YELLOW);
 			return getDefaultConfig();
 		}
 	}
