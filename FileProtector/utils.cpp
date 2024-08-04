@@ -7,9 +7,10 @@
 
 namespace fs = std::filesystem;
 
+/* const std::string imghider::invalidChars = "\\/:*?\"<>|";*/
 namespace imghider {
 	// Набор недопустимых символов для имени файла
-	static const std::string invalidChars = "\\/:*?\"<>|";
+
 
 	bool isValidFileName(const std::string& fileName) {
 		// Используем std::find_first_of для поиска любого из недопустимых символов
@@ -137,6 +138,10 @@ namespace imghider {
 			printColoredMessage("Ошибка при разрешении дубликата: " + std::string(e.what()), CONSOLE_RED);
 			return true; // return true to skip the file in case of error
 		}
+		catch (...) {
+			printColoredMessage("Неизвестная ошибка при разрешении дубликата. Файл пропущен.", CONSOLE_RED);
+			return true; // return true to skip the file in case of error
+		}
 		return false;
 	}
 
@@ -158,6 +163,51 @@ namespace imghider {
 			return tokens.back(); // Получаем последний элемент
 		}
 		return "";
+	}
+
+	// Функция для удаления пробелов с начала строки
+	std::string ltrim(const std::string& s) {
+		std::string result = s;
+		result.erase(result.begin(), std::find_if(result.begin(), result.end(), [](unsigned char ch) {return !std::isspace(ch); }));
+		return result;
+	}
+
+	// Функция для удаления пробелов с конца строки
+	std::string rtrim(const std::string& s) {
+		std::string result = s;
+		result.erase(std::find_if(result.rbegin(), result.rend(), [](unsigned char ch) {
+			return !std::isspace(ch);
+			}).base(), result.end());
+		return result;
+	}
+
+	// Функция для удаления пробелов с начала и конца строки
+	std::string trim(const std::string& s) {
+		return ltrim(rtrim(s));
+	}
+
+	fs::path trimPath(fs::path path) {
+		std::vector < std::string> pathParts = split(path.string(), fs::path::preferred_separator);
+		for (size_t i = 0; i < pathParts.size(); i++)
+		{
+			pathParts[i] = trim(pathParts[i]);
+		}
+		return make_path(pathParts);
+	}
+
+	fs::path addSuffixIfExists(const fs::path& directory_path, const fs::path& file_name) {
+		fs::path full_path = directory_path / file_name;
+
+		if (fs::exists(full_path) && fs::is_regular_file(full_path)) {
+			int counter = 1;
+			fs::path new_path;
+			do {
+				new_path = directory_path / (full_path.stem().string() + " (" + std::to_string(counter) + ")" + full_path.extension().string());
+				++counter;
+			} while (fs::exists(new_path));
+			return new_path;
+		}
+		return full_path;
 	}
 
 	void xorEncryptDecrypt(std::vector<uchar>& data, const std::string& key)
