@@ -162,7 +162,8 @@ namespace imghider {
 				printColoredMessage("Ошибка: не удалось восстановить изображение " + outputPath.string(), CONSOLE_RED);
 			}
 			else {
-				printColoredMessage("Восстановлен файл " + outputPath.string(), CONSOLE_GREEN);
+				printColoredMessage("\nВосстановлен файл ", CONSOLE_GREEN, "");
+				printColoredMessage(outputPath.string(), CONSOLE_CYAN);
 			}		
 			return true;
 		}

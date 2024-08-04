@@ -61,9 +61,9 @@ int main() {
 	}
 
 	#if defined(_WIN32) || defined(_WIN64)
-		std::system("cls"); // Windows
+		std::system("cls");
 	#else
-		std::system("clear"); // Unix-подобные системы
+		std::system("clear");
 	#endif
 
 	configureFromJson();
