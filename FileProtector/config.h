@@ -6,12 +6,17 @@
 #include <filesystem>
 #include <string>
 #include "nlohmann/json.hpp"
+#include <set>
+
+typedef unsigned char uchar;
 
 namespace imghider
 {
-	static const short RCC_Shift = 1; // File Name Encrypting Start Shift
+	static constexpr short RCC_Shift = 1; // File Name Encrypting Start Shift
 	static constexpr int DEFAULT_CHUNK_SIZE = 1024 * 1024; // Size in bytes of the file to be encoded, 1 MB By default
-	static const std::string ENCRYPTING_KEY = "Enter_YOUR_Key_Which_Will_Be_Used_In_Encrypring";
+	static const std::string ENCRYPTING_KEY = "Enter_YOUR_Key_Which_Will_Be_Used_In_Encrypting";
+    static const std::set<std::string> image_extensions = { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".webp" };
+    static const std::string invalidChars = "\\/:*?\"<>|";
 }
 
 static const std::string PASSWORD = ""; // Spicify your password
