@@ -5,7 +5,7 @@
 #include "opencv2/imgcodecs.hpp"
 
 namespace imghider {
-	bool saveImage(const std::string& binaryPath, const std::string& imageName, const cv::Mat& image) {
+	bool saveImageToBinary(const std::string& binaryPath, const std::string& imageName, const cv::Mat& image) {
 		try {
 			std::ofstream binaryFile(binaryPath, std::ios::out | std::ios::binary | std::ios::app);
 
@@ -65,6 +65,11 @@ namespace imghider {
 						std::string imageFilename = entry.path().filename().string();
 						/*std::string newImageFilename = imageFilename;*/
 
+						if (!isImageFile(imagePath))
+						{
+							printColoredMessage("\nФайл " + imagePath + " пропущен, так как его расширение не поддерживается.", CONSOLE_DARK_YELLOW);
+							return;
+						}
 						fs::path imgRelPath = fs::relative(entry.path(), fs::path(directoryPath));
 						/*imgRelPath = imgRelPath.parent_path().empty() ? fs::path("") : imgRelPath;*/
 
@@ -83,7 +88,7 @@ namespace imghider {
 						}
 
 						addNameHashToFile(hashFilePath, fileHash);
-						if (saveImage(binaryPath, RCC::encryptFilename(imgRelPath.wstring(), RCC_Shift), image)) {
+						if (saveImageToBinary(binaryPath, RCC::encryptFilename(imgRelPath.wstring(), RCC_Shift), image)) {
 							printColoredMessage("\nФайл " + imgRelPath.string() + " успешно добавлен в " + binaryPath, CONSOLE_GREEN, "");
 							if (fs::remove(imagePath)) {
 								printColoredMessage(" и удален из " + directoryPath + '.', CONSOLE_GREEN);
@@ -113,7 +118,66 @@ namespace imghider {
 		}
 	}
 
-	std::tuple<cv::Mat, std::string, size_t, bool> loadImage(const std::string& binaryPath, const size_t start) {
+	bool saveImage(const cv::Mat image, const fs::path& imageName, const fs::path& outputDirectory) noexcept {
+		try {
+
+			fs::path outputPath = outputDirectory / imageName;
+			fs::path fileParentPath = outputPath.parent_path();
+
+			outputPath = trimPath(outputPath);
+			fileParentPath = trimPath(fileParentPath);
+
+			if (!fs::exists(fileParentPath)) {
+				try {
+					fs::create_directories(fileParentPath);
+				}
+				catch (const std::exception& e) {
+					printColoredMessage("Не удалось создать директорию " + fileParentPath.string() + " для изображения: " + std::string(e.what()), CONSOLE_RED);
+					if (!fs::exists(outputDirectory)) {
+						try {
+							fs::create_directories(outputDirectory);
+						}
+						catch (const std::exception& e) {
+							printColoredMessage("Не удалось создать " + outputDirectory.string() + ": " + e.what(), CONSOLE_RED);
+							return false;
+						}
+						catch (...) {
+							printColoredMessage("Неизвестная ошибка при создании + outputDirectory", CONSOLE_RED);
+							return false;
+						}
+					}
+					if (!fs::exists(outputDirectory / imageName.filename()))
+					{
+						outputPath = outputDirectory / imageName.filename();
+					}
+					else {
+						do {
+							outputPath = outputDirectory / fs::path(getUniqueFilename(imageName.string())).filename();
+						} while (fs::exists(outputPath));
+					}
+				}
+			}
+			outputPath = addSuffixIfExists(outputPath.parent_path(), outputPath.filename());
+			if (!cv::imwrite(outputPath.string(), image)) {
+				printColoredMessage("Ошибка: не удалось восстановить изображение " + outputPath.string(), CONSOLE_RED);
+			}
+			else {
+				printColoredMessage("Восстановлен файл " + outputPath.string(), CONSOLE_GREEN);
+			}		
+			return true;
+		}
+		catch (const std::exception& e) {
+			printColoredMessage("Ошибка при обработке изображения: " + std::string(e.what()), CONSOLE_RED);
+			return false;
+		}
+		catch (...) {
+			printColoredMessage("Неизвестная ошибка при обработке изображения.", CONSOLE_RED);
+			return false;
+		}
+
+	}
+
+	std::tuple<cv::Mat, std::string, size_t, bool> loadImageFromBinary(const std::string& binaryPath, const size_t start) {
 		try {
 			std::ifstream binaryFile(binaryPath, std::ios::in | std::ios::binary);
 
@@ -177,7 +241,7 @@ namespace imghider {
 		}
 	}
 
-	void loadImagesFromBinary(const std::string& binaryPath, const std::string& outputDirectory) {
+	void loadAndSaveImagesFromBinary(const std::string& binaryPath, const std::string& outputDirectory) {
 		try {
 			// Проверяем и создаем пути, если необходимо
 			checkAndCreatePaths({ {outputDirectory, binaryPath} });
@@ -193,66 +257,21 @@ namespace imghider {
 			size_t start = 0;
 
 			while (start < fileSize) {
-				try {
-					auto imageData = loadImage(binaryPath, start);
-					const cv::Mat& image = std::get<0>(imageData);
-					const std::string& imageName = std::get<1>(imageData);
-					size_t newStart = std::get<2>(imageData);
-					bool success = std::get<3>(imageData);
 
-					if (!success) {
-						printColoredMessage("Ошибка при чтении изображения. Проверьте наличие файла " + binaryPath + " и повторите попытку.", CONSOLE_RED);
-						return;
-					}
+				auto imageData = loadImageFromBinary(binaryPath, start);
+				const cv::Mat& image = std::get<0>(imageData);
+				const std::string imageName = std::get<1>(imageData);
+				//size_t newStart = std::get<2>(imageData);
+				bool success = std::get<3>(imageData);
 
-					fs::path outputPath = fs::path(outputDirectory) / fs::path(imageName);
-					fs::path filePathExceptFilename = outputPath.parent_path();
+				start = std::get<2>(imageData);
 
-					if (!fs::exists(filePathExceptFilename)) {
-						try {
-							fs::create_directories(filePathExceptFilename);
-						}
-						catch (const std::exception& e) {
-							printColoredMessage("Не удалось создать директорию " + filePathExceptFilename.string() + " для изображения: " + std::string(e.what()), CONSOLE_RED);
-							// Попытка записи в базовую директорию
-							if (!fs::exists(outputDirectory)) {
-								try {
-									fs::create_directories(outputDirectory);
-								}
-								catch (const std::exception& e) {
-									printColoredMessage("Не удалось создать " + outputDirectory + ": " + e.what(), CONSOLE_RED);
-									return; // Прерываем выполнение функции, если не удалось создать директорию
-								}
-								catch (...) {
-									printColoredMessage("Неизвестная ошибка при создании + outputDirectory", CONSOLE_RED);
-									return;
-								}
-							}
-							if (!fs::exists(fs::path(outputDirectory) / fs::path(imageName).filename()))
-							{
-								outputPath = (fs::path(outputDirectory) / fs::path(imageName).filename()).string();
-							}
-							else {
-								do {
-									outputPath = (fs::path(outputDirectory) / fs::path(getUniqueFilename(imageName)).filename()).string();
-								} while (fs::exists(outputPath));
-							}
-						}
-					}
-					if (!cv::imwrite(outputPath.string(), image)) {
-						printColoredMessage("Ошибка: не удалось восстановить изображение " + outputPath.string(), CONSOLE_RED);
-					}
-					else {
-						printColoredMessage("Восстановлен файл " + outputPath.string(), CONSOLE_GREEN);
-						start = newStart;
-					}
+				if (!success || image.empty() || imageName.empty()) {
+					printColoredMessage("Ошибка при чтении изображения. Проверьте наличие файла " + binaryPath + ". Возможно, файл поврежден.", CONSOLE_RED);
+					continue;
 				}
-				catch (const std::exception& e) {
-					printColoredMessage("Ошибка при обработке изображения: " + std::string(e.what()), CONSOLE_RED);
-				}
-				catch (...) {
-					printColoredMessage("Неизвестная ошибка при обработке изображения.", CONSOLE_RED);
-				}
+
+				saveImage(image, fs::path(imageName), fs::path(outputDirectory));
 			}
 		}
 		catch (const std::exception& e) {
@@ -330,9 +349,9 @@ namespace imghider {
 		}
 	}
 
-	bool checkAndCreatePaths(const Params& params) {
+	bool checkAndCreatePaths(const std::vector<std::string>& paths, bool verbose) {
 		bool createdAny = false;
-		for (const auto& path : params.paths) {
+		for (const auto& path : paths) {
 			fs::path fsPath(path);
 			try {
 				if (fsPath.has_extension()) {
@@ -344,18 +363,18 @@ namespace imghider {
 						std::ofstream file(fsPath);
 						if (file) {
 							createdAny = true;
-							if (params.verbose) {
+							if (verbose) {
 								printColoredMessage("Создан файл: " + fsPath.string(), CONSOLE_GREEN);
 							}
 						}
 						else {
-							if (params.verbose) {
+							if (verbose) {
 								printColoredMessage("Ошибка создания файла: " + fsPath.string(), CONSOLE_RED);
 							}
 						}
 					}
 					else {
-						if (params.verbose) {
+						if (verbose) {
 							printColoredMessage("Файл уже существует: " + fsPath.string(), CONSOLE_YELLOW);
 						}
 					}
@@ -364,18 +383,18 @@ namespace imghider {
 					if (!fs::exists(fsPath)) {
 						if (fs::create_directories(fsPath)) {
 							createdAny = true;
-							if (params.verbose) {
+							if (verbose) {
 								printColoredMessage("Создана директория " + fsPath.string(), CONSOLE_GREEN);
 							}
 						}
 						else {
-							if (params.verbose) {
+							if (verbose) {
 								printColoredMessage("Не удалось создать директорию " + fsPath.string(), CONSOLE_RED);
 							}
 						}
 					}
 					else {
-						if (params.verbose) {
+						if (verbose) {
 							printColoredMessage("Директория " + fsPath.string() + " уже существует", CONSOLE_YELLOW);
 						}
 					}
@@ -394,6 +413,23 @@ namespace imghider {
 		return createdAny;
 	}
 
+	fs::path make_path(const std::vector<std::string>& parts) {
+		fs::path p;
+		for (const auto& part : parts) {
+			p /= part;
+		}
+		return p;
+	}
+
+	bool isImageFile(const fs::path& file_name) {
+
+		fs::path file_path(file_name);
+		std::string extension = file_path.extension().string();
+
+		std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
+
+		return image_extensions.find(extension) != image_extensions.end();
+	}
 	//template<typename... Paths>
 	//std::string createPath(Paths... paths) {
 	//	std::filesystem::path combinedPath;

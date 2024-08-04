@@ -1,5 +1,4 @@
 ﻿#include "stdafx.h"
-
 #include "opencv2/core/mat.hpp"
 
 namespace imghider {
@@ -34,7 +33,8 @@ namespace imghider {
 		}
 		return true;
 	}
-	cv::Mat findImage(const std::string& binaryPath, const std::string& searchFilename, std::string& foundImageName) noexcept {
+
+	cv::Mat findImage(const std::string& binaryPath, const std::string& searchFilename, std::string* foundImageName, bool exactMatch, const std::string& outputDirectory) noexcept {
 		try {
 			std::ifstream file(binaryPath, std::ios::binary | std::ios::ate);
 			if (!file.is_open()) {
@@ -45,10 +45,11 @@ namespace imghider {
 			static cv::Mat cachedImage;
 			static std::string cachedImageName;
 
-			if (!cachedImage.empty() && !cachedImageName.empty() && cachedImageName == searchFilename)
+			if (exactMatch && !cachedImage.empty() && !cachedImageName.empty() && cachedImageName == searchFilename)
 			{
 				printColoredMessage("\nБыло использовано изображение \"" + cachedImageName + "\" найденное при прошлом поиске", CONSOLE_DARK_YELLOW);
-				foundImageName = cachedImageName;
+				if (foundImageName != nullptr)
+					*foundImageName = cachedImageName;
 				return cachedImage;
 			}
 			size_t fileSize = file.tellg();
@@ -57,7 +58,7 @@ namespace imghider {
 
 			while (start < fileSize) {
 				try {
-					auto imageData = loadImage(binaryPath, start);
+					auto imageData = loadImageFromBinary(binaryPath, start);
 					const cv::Mat image = std::get<0>(imageData);
 					const std::string& imageName = std::get<1>(imageData);
 					size_t newStart = std::get<2>(imageData);
@@ -67,10 +68,27 @@ namespace imghider {
 						printColoredMessage("Ошибка при чтении изображения из \"" + binaryPath + "\".", CONSOLE_RED);
 						return cv::Mat();
 					}
-					if (imageName == searchFilename) {
-						cachedImageName = foundImageName = imageName;
+					if (exactMatch && fs::path(imageName).filename().string() == searchFilename) {
+						if (foundImageName != nullptr)
+							*foundImageName = imageName;
+						cachedImageName = imageName;
 						cachedImage = image;
 						return image;
+					}
+
+					std::wstring lowercaseImageName = fs::path(imageName).filename().wstring();
+					std::wstring lowercaseSearchFilename = string_to_wstring(searchFilename);
+
+					std::transform(lowercaseImageName.begin(), lowercaseImageName.end(), lowercaseImageName.begin(), towlower);
+					std::transform(lowercaseSearchFilename.begin(), lowercaseSearchFilename.end(), lowercaseSearchFilename.begin(), towlower);
+
+					if (lowercaseImageName.find(lowercaseSearchFilename) != std::wstring::npos)
+					{
+						saveImage(
+							image, 
+							fs::path(imageName).filename().string(),
+							fs::path(outputDirectory) / fs::path("search results for " + searchFilename)
+						);
 					}
 					start = newStart;
 				}
@@ -82,7 +100,8 @@ namespace imghider {
 					printColoredMessage("Неизвестная Ошибка при загрузке изображения", CONSOLE_RED);
 					return cv::Mat();
 				}
-			}
+			} 
+			return cv::Mat();
 		}
 		catch (const std::ifstream::failure& e) {
 			printColoredMessage("Ошибка при работе с файлом: " + std::string(e.what()), CONSOLE_RED);
@@ -96,13 +115,13 @@ namespace imghider {
 			printColoredMessage("Неизвестная ошибка.", CONSOLE_RED);
 			return cv::Mat();
 		}
-		return cv::Mat();
 	}
+
 	bool findAndDisplayImage(const std::string& binaryPath, const std::string& searchFilename) noexcept {
 		checkAndCreatePaths({ {binaryPath} });
 
 		std::string imageName;
-		const cv::Mat image = findImage(binaryPath, searchFilename, imageName);
+		const cv::Mat image = findImage(binaryPath, searchFilename, &imageName);
 		if (image.empty() || imageName.empty())
 		{
 			return false;
