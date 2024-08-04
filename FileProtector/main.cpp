@@ -8,8 +8,8 @@
 std::string imagesBaseDirectory;
 std::string imagesSaveFromPath;
 std::string imagesSaveToPath;
-std::string binaryPath;
 std::string imagesRecoveredDirectory;
+std::string binaryPath;
 std::string hashFilePath;
 
 std::string videoBaseDirectory;
@@ -19,6 +19,7 @@ std::string videoRecoveredDirectory;
 
 std::vector<std::string> paths;
 std::unique_ptr<VideoEncryptor> VE;
+
 static const int ConsoleDefaultHeight = GetConsoleWindowHeight();
 
 
@@ -39,17 +40,53 @@ bool authenticateUser() {
 
 void initializeDirectories(const std::vector<std::string>& paths, bool verbose = false) {
 	printColoredMessage("Создаются все необходимы папки, если их нет. . . \n\n", CONSOLE_GREEN);
-	imghider::checkAndCreatePaths({ paths, verbose });
+	imghider::checkAndCreatePaths( paths, verbose );
 }
 
 void displayMainMenu();
 void showDeletionMenu();
-void handleUserInput(char userInput);
+void handleUserInput(int userInput);
 void printHelp();
+int getUserChoice(bool shouldPrintHelp = false);
+void configureFromJson();
+
+int main() {
+	ResizeConsole(36, 120, 10000, 120);
+
+	std::setlocale(LC_ALL, "ru_RU");
+	SetConsoleCP(1251);
+
+	if (!authenticateUser()) {
+		return 1;
+	}
+
+	#if defined(_WIN32) || defined(_WIN64)
+		std::system("cls"); // Windows
+	#else
+		std::system("clear"); // Unix-подобные системы
+	#endif
+
+	configureFromJson();
+	printColoredMessage("\nНЕ УДАЛЯЙТЕ ПАПКИ " + binaryPath + " И " + videoEncryptedPath + " И ИХ СОДЕРЖИМОЕ ВО ИЗБЕЖАНИЕ ПОТЕРИ ИНФОРМАЦИИ\n", CONSOLE_RED);
+
+	initializeDirectories(paths);
+
+	int userInput;
+	std::cout << std::endl;
+	do {
+		displayMainMenu();
+		userInput = getUserChoice(true);
+		handleUserInput(userInput);
+	} while (true);
+
+	system("pause");
+	return 0;
+}
 
 void configureFromJson() {
+	std::cout << std::endl;
 	json config = ConfigHandler::loadConfig(ConfigHandler::defaultConfigFilePath);
-	// Прямой доступ к значениям конфигурации
+
 	const json& paths = config["Paths"];
 	const json& files = config["Files"];
 
@@ -61,7 +98,6 @@ void configureFromJson() {
 	binaryPath = (std::filesystem::path(imagesSaveToPath) / files["binary_path"].get<std::string>()).string();
 	hashFilePath = (std::filesystem::path(imagesSaveToPath) / files["hash_file_path"].get<std::string>()).string();
 
-	// Настройка VideoEncryptor
 	VE = std::make_unique<VideoEncryptor>(
 		imghider::ENCRYPTING_KEY,
 		paths["video_base_directory"].get<std::string>(),
@@ -71,7 +107,6 @@ void configureFromJson() {
 		imghider::RCC_Shift
 	);
 
-	// Получение путей из VideoEncryptor
 	videoBaseDirectory = VE->getBaseDirectory();
 	videoInputPath = (std::filesystem::path(videoBaseDirectory) / VE->getInputFolder()).string();
 	videoEncryptedPath = (std::filesystem::path(videoBaseDirectory) / VE->getEncryptedFolder()).string();
@@ -81,84 +116,63 @@ void configureFromJson() {
 		videoInputPath, videoEncryptedPath, videoRecoveredDirectory };
 }
 
-int main() {
-	ResizeConsole(36, 120, 10000, 120);
-
-	std::setlocale(LC_ALL, "ru_RU");
-	SetConsoleCP(1251);
-	//SetConsoleOutputCP(1251);
-	//SetConsoleCP(1251);
-
-	COORD cursorPos = getCursorposition();
-	if (!authenticateUser()) {
-		return 1;
-	}
-
-	SetCursorPosition(0, cursorPos.Y);
-	//SetCursorPosition(0, 0);
-
-	configureFromJson();
-	printColoredMessage("\nНЕ УДАЛЯЙТЕ ПАПКИ " + binaryPath + " И " + videoEncryptedPath + " И ИХ СОДЕРЖИМОЕ ВО ИЗБЕЖАНИЕ ПОТЕРИ ИНФОРМАЦИИ\n", CONSOLE_RED);
-
-	initializeDirectories(paths);
-
-	uchar userInput;
-	std::cout << std::endl;
-	do {
-		displayMainMenu();
-		std::cin >> userInput;
-		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-		handleUserInput(userInput);
-	} while (true);
-
-	system("pause");
-	return 0;
-}
-
-void handleUserInput(char userInput) {
+void handleUserInput(int userInput) {
 	switch (userInput) {
-	case '1':
+	case 1:
 		std::cout << "\n";
 		initializeDirectories(paths, true);
 		break;
-	case '2':
+	case 2:
 		imghider::saveImagesToBinary(imagesSaveFromPath, binaryPath, hashFilePath);
 		std::cout << std::endl;
 		break;
-	case '3':
-		imghider::loadImagesFromBinary(binaryPath, imagesRecoveredDirectory);
+	case 3:
+		imghider::loadAndSaveImagesFromBinary(binaryPath, imagesRecoveredDirectory);
 		std::cout << std::endl;
 		break;
-	case '4':
+	case 4:
+	{
+		std::string searchFilename;
+		printColoredMessage("\nВведите название или часть названия для поиска: ", CONSOLE_BLUE, "");
+		std::getline(std::cin, searchFilename);
+		if (!imghider::isValidFileName(searchFilename) || searchFilename.empty())
+		{
+			printColoredMessage("Некорректное имя файла. Название не должно содержать след. символов: " + imghider::invalidChars, CONSOLE_RED);
+			break;
+		}
+		printColoredMessage("\nИдет поиск...\n", CONSOLE_CYAN);
+		imghider::findImage(binaryPath, searchFilename, nullptr, false, imagesRecoveredDirectory);
+		break;
+	}
+	case 5:
 		VE->encryptMp4();
 		break;
-	case '5':
+	case 6:
 		VE->decryptMp4();
 		break;
-	case '6':
+	case 7:
 		VE->setShouldEncryptDecryptedFolder(true);
 		break;
-	case '7':
+	case 8:
 		showDeletionMenu();
 		break;
-	case '8':
+	case 9:
 		configureFromJson();
 		break;
-	case '9':
+	case 10:
 		ConfigHandler::createDefaultConfigFile(ConfigHandler::defaultConfigFilePath);
 		break;
-	case 'h':
+	case (int)'h':
 		printHelp();
 		break;
-	case '0':
-	case 'q':
+	case -1:
 		exit(EXIT_SUCCESS);
+
 	default:
 		printColoredMessage("Некорректный ввод", CONSOLE_RED);
 		break;
 	}
 }
-
 
 void displayMainMenu() {
 	printColoredMessage("\nГлавное меню:", CONSOLE_CYAN);
@@ -166,49 +180,32 @@ void displayMainMenu() {
 	std::cout << "1) Создать все необходимые папки и файлы\n";
 	std::cout << "2) Сохранить изображения из " << imagesSaveFromPath << std::endl;
 	std::cout << "3) Загрузить сохраненные изображения из " << binaryPath << std::endl;
-	std::cout << "4) Зашифровать видео из " << videoInputPath << std::endl;
-	std::cout << "5) Расшифровать видео из " << videoEncryptedPath << std::endl;
-	std::cout << "6) Также шифровать расшифрованные файлы из " << videoInputPath << " при выборе 4 пункта и сохранить в " << videoEncryptedPath << " (по умолчанию они НЕ ШИФРУЮТСЯ, зашифрованные файлы при расшифровке не удаляются!!)" << std::endl;
-	std::cout << "7) Меню удаления файлов и папок\n";
-	std::cout << "8) Перезагрузить файл конфигурации\n";
-	std::cout << "9) Пересоздать файл конфигурации\n";
+	std::cout << "4) Поиск по фрагменту названия в сохраненных изображениях (" << binaryPath << ')' << std::endl;
+	std::cout << "--------------------------------------------------------------------------------" << std::endl;
+	std::cout << "5) Зашифровать видео из " << videoInputPath << std::endl;
+	std::cout << "6) Расшифровать видео из " << videoEncryptedPath << std::endl;
+	std::cout << "7) Также шифровать расшифрованные файлы из " << videoInputPath << " при выборе 4 пункта и сохранить в " << videoEncryptedPath << std::endl;
+	std::cout << "--------------------------------------------------------------------------------" << std::endl;
+	std::cout << "8) Меню удаления файлов и папок\n";
+	std::cout << "9) Перезагрузить файл конфигурации\n";
+	std::cout << "10) Пересоздать файл конфигурации\n";
 	std::cout << "h) Справка по программе\n";
-	printColoredMessage("\nВведите ваш выбор: ", CONSOLE_BLUE, "");
 }
 
-void showDeletionMenu() {
-	bool exitFlag = false;
+int getUserChoice(bool shouldPrintHelp) {
 	std::regex numberPattern("^[0-9]+$");
-	printColoredMessage("\nМеню удаления файлов и папок", CONSOLE_CYAN);
-
-	while (!exitFlag) {
-		std::cout << "\n0, q - возврат в главное меню\n";
-		printColoredMessage("----- Изображения -----", CONSOLE_CYAN);
-		std::cout << "1) Отчистить всю папку " << imagesBaseDirectory << std::endl;
-		std::cout << "2) Удалить восстановленные изображения из " << imagesRecoveredDirectory << std::endl;
-		std::cout << "3) Удалить сохраненные изображения из " << imagesSaveToPath << std::endl;
-		std::cout << "4) Удалить несохраненные изображения из " << imagesSaveFromPath << std::endl;
-		printColoredMessage("----- Видео -----", CONSOLE_CYAN);
-		std::cout << "5) Удалить всё из " << videoBaseDirectory << std::endl;
-		std::cout << "6) Удалить восстановленные видео из " << videoRecoveredDirectory << std::endl;
-		std::cout << "7) Удалить зашифрованные видео из " << videoEncryptedPath << std::endl;
-		std::cout << "8) Удалить несохраненные видео из " << videoInputPath << std::endl;
-		printColoredMessage("----- Изображения + Видео -----", CONSOLE_CYAN);
-		std::cout << "9) Удалить всё из " << imagesBaseDirectory + " И " + videoBaseDirectory << std::endl;
-		std::cout << "10) Удалить восстановленные изображения и видео из " << imagesRecoveredDirectory + " И " + videoRecoveredDirectory << std::endl;
-		std::cout << "11) Удалить сохраненные изображения из " << imagesSaveToPath + " И зашифрованные видео из " + videoEncryptedPath << std::endl;
-		std::cout << "12) Удалить несохраненные изображения и видео из " << imagesSaveFromPath + " И " + videoInputPath << std::endl;
-
+	while (true)
+	{
 		printColoredMessage("\nВведите ваш выбор: ", CONSOLE_BLUE, "");
-
 		std::string userInput;
 		std::getline(std::cin, userInput);
 
 		if (userInput == "0" || userInput == "q") {
-			exitFlag = true;
-			continue;
+			return -1;
 		}
-
+		if (shouldPrintHelp && (userInput == "h" || userInput == "help")) {
+			return 'h';
+		}
 		if (!std::regex_match(userInput, numberPattern)) {
 			printColoredMessage("Некорректный ввод", CONSOLE_RED);
 			continue;
@@ -229,6 +226,38 @@ void showDeletionMenu() {
 		}
 		catch (std::out_of_range&) {
 			printColoredMessage("Некорректный ввод", CONSOLE_RED);
+			continue;
+		}
+		return choice;
+	}
+}
+
+void showDeletionMenu() {
+	bool exitFlag = false;
+	printColoredMessage("\nМеню удаления файлов и папок", CONSOLE_CYAN);
+
+	while (!exitFlag) {
+		std::cout << "\n0, q - возврат в главное меню\n";
+		printColoredMessage("----- Изображения -----", CONSOLE_CYAN);
+		std::cout << "1) Отчистить всю папку " << imagesBaseDirectory << std::endl;
+		std::cout << "2) Удалить восстановленные изображения из " << imagesRecoveredDirectory << std::endl;
+		std::cout << "3) Удалить сохраненные изображения из " << imagesSaveToPath << std::endl;
+		std::cout << "4) Удалить несохраненные изображения из " << imagesSaveFromPath << std::endl;
+		printColoredMessage("----- Видео -----", CONSOLE_CYAN);
+		std::cout << "5) Удалить всё из " << videoBaseDirectory << std::endl;
+		std::cout << "6) Удалить восстановленные видео из " << videoRecoveredDirectory << std::endl;
+		std::cout << "7) Удалить зашифрованные видео из " << videoEncryptedPath << std::endl;
+		std::cout << "8) Удалить несохраненные видео из " << videoInputPath << std::endl;
+		printColoredMessage("----- Изображения + Видео -----", CONSOLE_CYAN);
+		std::cout << "9) Удалить всё из " << imagesBaseDirectory + " И " + videoBaseDirectory << std::endl;
+		std::cout << "10) Удалить восстановленные изображения и видео из " << imagesRecoveredDirectory + " И " + videoRecoveredDirectory << std::endl;
+		std::cout << "11) Удалить сохраненные изображения из " << imagesSaveToPath + " И зашифрованные видео из " + videoEncryptedPath << std::endl;
+		std::cout << "12) Удалить несохраненные изображения и видео из " << imagesSaveFromPath + " И " + videoInputPath << std::endl;
+
+		int choice = getUserChoice();
+		if (choice == -1)
+		{
+			exitFlag = true;
 			continue;
 		}
 
