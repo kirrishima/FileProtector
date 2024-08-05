@@ -1,10 +1,10 @@
-#include "stdafx.h"
+п»ї#include "stdafx.h"
 #include "config.h"
 #include <format>
 
 const std::string ConfigHandler::defaultConfigFilePath = "config.json";
 
-// Возвращаем базовую конфигурацию
+// Р’РѕР·РІСЂР°С‰Р°РµРј Р±Р°Р·РѕРІСѓСЋ РєРѕРЅС„РёРіСѓСЂР°С†РёСЋ
 json ConfigHandler::getDefaultConfig() {
 	return json{
 		{"Paths", {
@@ -24,21 +24,21 @@ json ConfigHandler::getDefaultConfig() {
 	};
 }
 
-// Создаем файл конфигурации с базовыми настройками
+// РЎРѕР·РґР°РµРј С„Р°Р№Р» РєРѕРЅС„РёРіСѓСЂР°С†РёРё СЃ Р±Р°Р·РѕРІС‹РјРё РЅР°СЃС‚СЂРѕР№РєР°РјРё
 void ConfigHandler::createDefaultConfigFile(const std::string& filePath) {
 	json defaultConfig = getDefaultConfig();
 	std::ofstream configFile(filePath);
 	if (configFile.is_open()) {
-		configFile << defaultConfig.dump(4); // Запись с отступами для удобства чтения
+		configFile << defaultConfig.dump(4); // Р—Р°РїРёСЃСЊ СЃ РѕС‚СЃС‚СѓРїР°РјРё РґР»СЏ СѓРґРѕР±СЃС‚РІР° С‡С‚РµРЅРёСЏ
 		configFile.close();
-		printColoredMessage("Конфигурационный файл был создан в: " + std::filesystem::absolute(filePath).string(), CONSOLE_GREEN);
+		printColoredMessage("РљРѕРЅС„РёРіСѓСЂР°С†РёРѕРЅРЅС‹Р№ С„Р°Р№Р» Р±С‹Р» СЃРѕР·РґР°РЅ РІ: " + std::filesystem::absolute(filePath).string(), CONSOLE_GREEN);
 	}
 	else {
-		printColoredMessage("Ошибка: Не удалось создать конфигурационный файл!", CONSOLE_DARK_RED);
+		printColoredMessage("РћС€РёР±РєР°: РќРµ СѓРґР°Р»РѕСЃСЊ СЃРѕР·РґР°С‚СЊ РєРѕРЅС„РёРіСѓСЂР°С†РёРѕРЅРЅС‹Р№ С„Р°Р№Р»!", CONSOLE_DARK_RED);
 	}
 }
 
-// Загружаем файл конфигурации
+// Р—Р°РіСЂСѓР¶Р°РµРј С„Р°Р№Р» РєРѕРЅС„РёРіСѓСЂР°С†РёРё
 json ConfigHandler::loadConfig(const std::string& filePath) {
 	std::ifstream configFile(filePath);
 	if (configFile.is_open()) {
@@ -47,46 +47,46 @@ json ConfigHandler::loadConfig(const std::string& filePath) {
 			configFile >> config;
 			if (!validateConfig(config))
 			{
-				printColoredMessage("Не валидный конфигурационный файл, используются настройки по умолчанию.", CONSOLE_DARK_RED);
+				printColoredMessage("РќРµ РІР°Р»РёРґРЅС‹Р№ РєРѕРЅС„РёРіСѓСЂР°С†РёРѕРЅРЅС‹Р№ С„Р°Р№Р», РёСЃРїРѕР»СЊР·СѓСЋС‚СЃСЏ РЅР°СЃС‚СЂРѕР№РєРё РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ.", CONSOLE_DARK_RED);
 				return getDefaultConfig();
 			}
-			printColoredMessage("Использованы настройки из " + std::filesystem::absolute(filePath).string(), CONSOLE_GREEN);
+			printColoredMessage("РСЃРїРѕР»СЊР·РѕРІР°РЅС‹ РЅР°СЃС‚СЂРѕР№РєРё РёР· " + std::filesystem::absolute(filePath).string(), CONSOLE_GREEN);
 			return config;
 		}
 		catch (const nlohmann::json::parse_error& e) {
 			printColoredMessage(std::format("JSON parse error: {}", e.what()), CONSOLE_DARK_RED);
-			printColoredMessage("Используются настройки по умолчанию.", CONSOLE_DARK_YELLOW);
+			printColoredMessage("РСЃРїРѕР»СЊР·СѓСЋС‚СЃСЏ РЅР°СЃС‚СЂРѕР№РєРё РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ.", CONSOLE_DARK_YELLOW);
 			return getDefaultConfig();
 		}
 		catch (const std::exception& e) {
-			printColoredMessage(std::format("Произошла неизвестная ошибка: {}", e.what()), CONSOLE_DARK_RED);
-			printColoredMessage("Используются настройки по умолчанию.", CONSOLE_DARK_YELLOW);
+			printColoredMessage(std::format("РџСЂРѕРёР·РѕС€Р»Р° РЅРµРёР·РІРµСЃС‚РЅР°СЏ РѕС€РёР±РєР°: {}", e.what()), CONSOLE_DARK_RED);
+			printColoredMessage("РСЃРїРѕР»СЊР·СѓСЋС‚СЃСЏ РЅР°СЃС‚СЂРѕР№РєРё РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ.", CONSOLE_DARK_YELLOW);
 			return getDefaultConfig();
 		}
 	}
 	else {
 		if (!std::filesystem::exists(filePath)) {
-			printColoredMessage("Конфигурационный файл не найден, он будет создан с настройками по умолчанию.", CONSOLE_DARK_YELLOW);
+			printColoredMessage("РљРѕРЅС„РёРіСѓСЂР°С†РёРѕРЅРЅС‹Р№ С„Р°Р№Р» РЅРµ РЅР°Р№РґРµРЅ, РѕРЅ Р±СѓРґРµС‚ СЃРѕР·РґР°РЅ СЃ РЅР°СЃС‚СЂРѕР№РєР°РјРё РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ.", CONSOLE_DARK_YELLOW);
 			createDefaultConfigFile(std::filesystem::absolute(filePath).string());
 		}
 		else {
-			printColoredMessage("Не удалось открыть конфигурационный файл, используются настройки по умолчанию.", CONSOLE_DARK_YELLOW);
+			printColoredMessage("РќРµ СѓРґР°Р»РѕСЃСЊ РѕС‚РєСЂС‹С‚СЊ РєРѕРЅС„РёРіСѓСЂР°С†РёРѕРЅРЅС‹Р№ С„Р°Р№Р», РёСЃРїРѕР»СЊР·СѓСЋС‚СЃСЏ РЅР°СЃС‚СЂРѕР№РєРё РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ.", CONSOLE_DARK_YELLOW);
 		}
 		return getDefaultConfig();
 	}
 }
 
 std::string ConfigHandler::getStringFromConfig(const json& config, const std::string& path, const std::string& defaultValue) {
-	// Разделяем путь на компоненты
+	// Р Р°Р·РґРµР»СЏРµРј РїСѓС‚СЊ РЅР° РєРѕРјРїРѕРЅРµРЅС‚С‹
 	size_t delimiterPos = path.find('.');
 	if (delimiterPos == std::string::npos) {
-		// Если нет разделителя, ищем значение прямо в корне
+		// Р•СЃР»Рё РЅРµС‚ СЂР°Р·РґРµР»РёС‚РµР»СЏ, РёС‰РµРј Р·РЅР°С‡РµРЅРёРµ РїСЂСЏРјРѕ РІ РєРѕСЂРЅРµ
 		if (config.contains(path) && config[path].is_string()) {
 			return config[path];
 		}
 	}
 	else {
-		// Если есть разделитель, обрабатываем вложенные объекты
+		// Р•СЃР»Рё РµСЃС‚СЊ СЂР°Р·РґРµР»РёС‚РµР»СЊ, РѕР±СЂР°Р±Р°С‚С‹РІР°РµРј РІР»РѕР¶РµРЅРЅС‹Рµ РѕР±СЉРµРєС‚С‹
 		std::string parentKey = path.substr(0, delimiterPos);
 		std::string childKey = path.substr(delimiterPos + 1);
 
@@ -97,10 +97,10 @@ std::string ConfigHandler::getStringFromConfig(const json& config, const std::st
 	return defaultValue;
 }
 
-// Функция для проверки структуры JSON и значений
+// Р¤СѓРЅРєС†РёСЏ РґР»СЏ РїСЂРѕРІРµСЂРєРё СЃС‚СЂСѓРєС‚СѓСЂС‹ JSON Рё Р·РЅР°С‡РµРЅРёР№
 bool ConfigHandler::validateConfig(const json& config) {
 
-	// Проверка наличия необходимых ключей и их типов
+	// РџСЂРѕРІРµСЂРєР° РЅР°Р»РёС‡РёСЏ РЅРµРѕР±С…РѕРґРёРјС‹С… РєР»СЋС‡РµР№ Рё РёС… С‚РёРїРѕРІ
 	if (!config.contains("Paths") || !config["Paths"].is_object() ||
 		!config.contains("Files") || !config["Files"].is_object()) {
 		return false;
@@ -109,7 +109,7 @@ bool ConfigHandler::validateConfig(const json& config) {
 	const json& paths = config["Paths"];
 	const json& files = config["Files"];
 
-	// Проверка ключей в Paths
+	// РџСЂРѕРІРµСЂРєР° РєР»СЋС‡РµР№ РІ Paths
 	std::vector<std::string> pathsKeys = {
 		"images_base_directory", "images_save_from_path", "images_save_to_path",
 		"images_recovered_directory", "video_base_directory", "video_input_directory",
@@ -122,7 +122,7 @@ bool ConfigHandler::validateConfig(const json& config) {
 		}
 	}
 
-	// Проверка ключей в Files
+	// РџСЂРѕРІРµСЂРєР° РєР»СЋС‡РµР№ РІ Files
 	std::vector<std::string> filesKeys = { "binary_path", "hash_file_path" };
 
 	for (const auto& key : filesKeys) {
