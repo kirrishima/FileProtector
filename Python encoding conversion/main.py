@@ -1,5 +1,4 @@
 import os
-import chardet
 import fnmatch
 from colorama import Fore,  Style, init
 from ftfy import guess_bytes
@@ -8,10 +7,9 @@ def detect_encoding(file_path):
     with open(file_path, 'rb') as f:
         raw_data = f.read()
 
-    # Пробуем угадать, как должен выглядеть текст
     result, encoding = guess_bytes(raw_data)
     return encoding
-# Инициализация colorama
+
 init(autoreset=True)
 
 def should_ignore(path, ignore_patterns):
@@ -24,25 +22,16 @@ def convert_file_encoding(file_path, target_encoding, current_encoding):
     with open(file_path, 'rb') as f:
         raw_data = f.read()
 
-    # detected_encoding = chardet.detect(raw_data)['encoding']
     detected_encoding = detect_encoding(file_path)
-
-    # if detected_encoding.lower() == target_encoding.lower():
-    #     print(Fore.YELLOW + "File " + Fore.CYAN + f"{file_path}" + Fore.YELLOW + " is already in " + Fore.BLUE + f"{target_encoding}" + Fore.YELLOW + " encoding")
-    #     return
 
     print(Fore.CYAN + Style.BRIGHT + f"Detected encoding: {detected_encoding}")
     try:
         detected_encoding = current_encoding
         print(Fore.CYAN + Style.BRIGHT + f"Parsing file as {detected_encoding}")
         text = raw_data.decode(detected_encoding)
-        # print(text)
         normalized_text = text.replace('\r\n', '\n').replace('\r', '\n')
-        # print(normalized_text)
         with open(file_path, 'w', encoding=target_encoding, newline='\n') as f:
-            # print("ABOBA")
             f.write(normalized_text)
-            # print("BOBA")
         print(Fore.GREEN +  Style.BRIGHT +"Converted " + Fore.CYAN + Style.BRIGHT +f"{file_path}" + Fore.GREEN + Style.BRIGHT +" from " + Fore.BLUE +Style.BRIGHT + detected_encoding + Fore.GREEN + Style.BRIGHT +" to " + Fore.BLUE + Style.BRIGHT +f"{target_encoding}")
 
     except Exception as e:
@@ -50,7 +39,7 @@ def convert_file_encoding(file_path, target_encoding, current_encoding):
 
 def convert_directory_encoding(directory, target_encoding, current_encoding, ignore_patterns):
     for root, dirs, files in os.walk(directory):
-        # Игнорирование директорий
+
         dirs[:] = [d for d in dirs if not should_ignore(os.path.join(root, d), ignore_patterns)]
         for file in files:
             file_path = os.path.join(root, file)
@@ -63,10 +52,11 @@ if __name__ == "__main__":
     encodings = ['UTF-8-SIG', 'windows-1251']
 
     ignore_patterns = [
-        '*/opencv/*',       # Игнорировать любую папку opencv в любом пути
-        '*/OpenSSL/*',      # Игнорировать любую папку OpenSSL в любом пути
-        '*.pyc',            # Игнорировать все файлы с расширением .pyc
-        '__pycache__'       # Игнорировать папку __pycache__
+        '*/opencv/*',       
+        '*/OpenSSL/*',
+        '*/Python encoding conversion/*',      
+        '*.pyc',            
+        '__pycache__'      
     ]
 
     if target_encoding not in ['1', '2']:
