@@ -3,6 +3,8 @@
 **/IMG*/
 **/VIDS*/
 /.vs/
+*filesystem_tree.txt
+*fd*.py
 FileProtector/x64
 HashingLib/x64
 VideoEncryptorLib/x64
@@ -12,7 +14,6 @@ FileProtector/opencv/*
 FileProtector/nlohmann/*
 HashingLib/OpenSSL/*
 !HashingLib/OpenSSL
-fd.py
 sasa.py
 *.exe
 config.json
