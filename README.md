@@ -74,20 +74,50 @@ The FileProtector project aims to secure files through encryption and other prot
 
 ## Project Structure
 
+1. **OpenCV**
+   - **Include Directory:**
+     - `opencv\build\install\include`
+   - **Additional Dependencies:**
+     - `FileProtector\opencv\build\install\x64\vc17\staticlib`
+
+2. **nlohmann json**
+   - **Include Directory:**
+     - `nlohmann`
+   - **Notes:**
+     - The library has no DLL or LIB files.
+
+3. **OpenSSL**
+   - **Include Directory:**
+     - `OpenSSL\include`
+   - **Library Directory:**
+     - `OpenSSL\lib`
+
+
 The project structure is organized as follows:
 
 ```
-FileProtector
+FileEncrypter
 ├── FileProtector
+│   ├── config.cpp
+│   ├── config.h
 │   ├── console.cpp
 │   ├── console.h
 │   ├── core.cpp
 │   ├── file_operations.cpp
 │   ├── hash_operations.cpp
 │   ├── icon.ico
+│   ├── icons
+│   │   ├── icon.ico
+│   │   ├── icon1.ico
+│   │   ├── icon2.ico
+│   │   ├── icon3.ico
+│   │   └── icon4.ico
 │   ├── image_display.cpp
 │   ├── imghider.h
 │   ├── main.cpp
+│   ├── nlohmann
+│   │   ├── json.hpp
+│   │   └── json_fwd.hpp
 │   ├── opencv
 │   │   └── build
 │   │       └── install
@@ -100,6 +130,7 @@ FileProtector
 │   ├── Resource.aps
 │   ├── resource.h
 │   ├── Resource.rc
+│   ├── stdafx.cpp
 │   ├── stdafx.h
 │   ├── utils.cpp
 │   ├── x64Debug.props
@@ -118,10 +149,8 @@ FileProtector
 │   ├── pch.cpp
 │   └── pch.h
 ├── Python encoding conversion
-│   ├── .venv
-│   │   └── ◯ ◯ ◯
-│   └── main.py
-├── README.md
+│   ├── main.py
+│   └── requirements.txt
 ├── VideoEncryptorLib
 │   ├── framework.h
 │   ├── pch.cpp
@@ -130,6 +159,10 @@ FileProtector
 │   ├── VideoEncryptor.cpp
 │   └── VideoEncryptor.h
 └── x64
+    ├── Debug
+    │   ├── FileProtector.exe
+    │   ├── HashingLib.lib
+    │   └── VideoEncryptorLib.lib
     └── Release
         ├── FileProtector.exe
         ├── HashingLib.lib
@@ -147,4 +180,4 @@ This configuration ensures all necessary static libraries and include files are 
 
 ## File Encoding
 
-To successfully upload to GitHub, the file encoding has been changed to UTF-8. If characters appear incorrectly after downloading the repository, run `Python encoding conversion\main.py` and select `windows-1251` encoding.
+To successfully upload to GitHub, the file encoding has been changed to UTF-8. If characters appear incorrectly after downloading the repository, run `Python encoding conversion\main.py`, installing reqs from  and select `windows-1251` encoding.
