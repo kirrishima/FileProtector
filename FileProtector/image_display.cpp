@@ -85,7 +85,7 @@ namespace imghider {
 					if (lowercaseImageName.find(lowercaseSearchFilename) != std::wstring::npos)
 					{
 						saveImage(
-							image, 
+							image,
 							fs::path(imageName).filename().string(),
 							fs::path(outputDirectory) / fs::path("search results for " + searchFilename)
 						);
@@ -100,7 +100,7 @@ namespace imghider {
 					printColoredMessage("Неизвестная Ошибка при загрузке изображения", CONSOLE_RED);
 					return cv::Mat();
 				}
-			} 
+			}
 			return cv::Mat();
 		}
 		catch (const std::ifstream::failure& e) {

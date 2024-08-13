@@ -4,7 +4,6 @@
 
 //#define DISABLE_PSWD
 
-// Инициализация констант
 std::string imagesBaseDirectory;
 std::string imagesSaveFromPath;
 std::string imagesSaveToPath;
@@ -40,7 +39,7 @@ bool authenticateUser() {
 
 void initializeDirectories(const std::vector<std::string>& paths, bool verbose = false) {
 	printColoredMessage("Создаются все необходимы папки, если их нет. . . \n\n", CONSOLE_GREEN);
-	imghider::checkAndCreatePaths( paths, verbose );
+	imghider::checkAndCreatePaths(paths, verbose);
 }
 
 void displayMainMenu();
@@ -60,11 +59,11 @@ int main() {
 		return 1;
 	}
 
-	#if defined(_WIN32) || defined(_WIN64)
-		std::system("cls");
-	#else
-		std::system("clear");
-	#endif
+#if defined(_WIN32) || defined(_WIN64)
+	std::system("cls");
+#else
+	std::system("clear");
+#endif
 
 	configureFromJson();
 	printColoredMessage("\nНЕ УДАЛЯЙТЕ ПАПКИ " + binaryPath + " И " + videoEncryptedPath + " И ИХ СОДЕРЖИМОЕ ВО ИЗБЕЖАНИЕ ПОТЕРИ ИНФОРМАЦИИ\n", CONSOLE_RED);

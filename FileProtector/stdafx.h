@@ -13,12 +13,14 @@
 #include <string>
 #include <tuple>
 #include <vector>
+
 // заголовочные файлы проекта
 #include "config.h"
 #include "imghider.h"
 #include "console.h"
 #include "VideoEncryptor.h"
 #include "hashing.h"
+
 // заголовочные файлы библиотек
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
@@ -26,6 +28,7 @@
 #include "opencv2/core/mat.hpp"
 #include "opencv2/imgcodecs.hpp"
 
+// Определения
 #define NOMINMAX
 
 #endif // !STDAFX_H

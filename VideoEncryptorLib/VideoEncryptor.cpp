@@ -102,19 +102,19 @@ void VideoEncryptor::encryptMp4() const
 							std::string filename = failedFileName = entry.path().filename().string();
 							std::string encryptedFilePath = (fs::path(encryptedDirectoryPath) / encryptFilename(filename, shift)).string();
 
-							// Read the first 1 MB of the input file
+							// Чтение первого 1 MB
 							std::vector<char> fileData = readPartialFile(encryptingFilePath, chunkSize);
 
-							// Encrypt the first 1 MB
+							// Шифровка 1 MB
 							xorEncryptDecrypt(fileData, key);
 
-							// Copy the original file to the encrypted file
+							// Копирование оригинального файла в зашифрованный
 							fs::copy_file(encryptingFilePath, encryptedFilePath, fs::copy_options::overwrite_existing);
 
-							// Write the encrypted chunk back to the new file
+							// Запись зашифрованного куска поверх 
 							writePartialFile(encryptedFilePath, fileData, 0);
 							std::cout << "Файл успешно зашифрован и сохранен как " << encryptedFilePath << std::endl;
-							// Delete the original file
+
 							if (fs::remove(encryptingFilePath)) {
 								std::cout << "Файл " << encryptingFilePath << " удален." << std::endl;
 							}
@@ -194,16 +194,9 @@ void VideoEncryptor::decryptMp4() const
 					std::string fileName = failedFileName = entry.path().filename().string();
 					std::string decryptedFilePath = (fs::path(decryptedDirectoryPath) / encryptFilename(fileName, -shift)).string();
 
-					// Read the first 1 MB of the encrypted file
 					std::vector<char> encryptedData = readPartialFile(encryptedFilePath, chunkSize);
-
-					// Decrypt the first 1 MB
 					xorEncryptDecrypt(encryptedData, key);
-
-					// Copy the encrypted file to the decrypted file
 					fs::copy_file(encryptedFilePath, decryptedFilePath, fs::copy_options::overwrite_existing);
-
-					// Write the decrypted chunk back to the new file
 					writePartialFile(decryptedFilePath, encryptedData, 0);
 
 					std::cout << "Файл расшифрован и сохранен как " << decryptedFilePath << std::endl;
@@ -216,7 +209,6 @@ void VideoEncryptor::decryptMp4() const
 							std::cerr << "Ошибка: Не удалось удалить исходный файл." << std::endl;
 						}
 					}
-					//std::cout << std::endl;
 				}
 				catch (const fs::filesystem_error& e) {
 					std::cerr << "Ошибка файловой системы при обработке файла " << failedFileName << ": " << e.what() << std::endl;

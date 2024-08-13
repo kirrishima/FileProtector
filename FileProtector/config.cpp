@@ -2,9 +2,8 @@
 #include "config.h"
 #include <format>
 
-const std::string ConfigHandler::defaultConfigFilePath = "config.json";
+const std::string ConfigHandler::defaultConfigFilePath = "config.json"; // Стандартный путь и название
 
-// Возвращаем базовую конфигурацию
 json ConfigHandler::getDefaultConfig() {
 	return json{
 		{"Paths", {
@@ -24,12 +23,12 @@ json ConfigHandler::getDefaultConfig() {
 	};
 }
 
-// Создаем файл конфигурации с базовыми настройками
+// Создает файл конфигурации с базовыми настройками
 void ConfigHandler::createDefaultConfigFile(const std::string& filePath) {
 	json defaultConfig = getDefaultConfig();
 	std::ofstream configFile(filePath);
 	if (configFile.is_open()) {
-		configFile << defaultConfig.dump(4); // Запись с отступами для удобства чтения
+		configFile << defaultConfig.dump(4);
 		configFile.close();
 		printColoredMessage("Конфигурационный файл был создан в: " + std::filesystem::absolute(filePath).string(), CONSOLE_GREEN);
 	}
@@ -38,7 +37,7 @@ void ConfigHandler::createDefaultConfigFile(const std::string& filePath) {
 	}
 }
 
-// Загружаем файл конфигурации
+// Загрузка файл конфигурации
 json ConfigHandler::loadConfig(const std::string& filePath) {
 	std::ifstream configFile(filePath);
 	if (configFile.is_open()) {
@@ -77,16 +76,13 @@ json ConfigHandler::loadConfig(const std::string& filePath) {
 }
 
 std::string ConfigHandler::getStringFromConfig(const json& config, const std::string& path, const std::string& defaultValue) {
-	// Разделяем путь на компоненты
 	size_t delimiterPos = path.find('.');
 	if (delimiterPos == std::string::npos) {
-		// Если нет разделителя, ищем значение прямо в корне
 		if (config.contains(path) && config[path].is_string()) {
 			return config[path];
 		}
 	}
 	else {
-		// Если есть разделитель, обрабатываем вложенные объекты
 		std::string parentKey = path.substr(0, delimiterPos);
 		std::string childKey = path.substr(delimiterPos + 1);
 
@@ -100,7 +96,6 @@ std::string ConfigHandler::getStringFromConfig(const json& config, const std::st
 // Функция для проверки структуры JSON и значений
 bool ConfigHandler::validateConfig(const json& config) {
 
-	// Проверка наличия необходимых ключей и их типов
 	if (!config.contains("Paths") || !config["Paths"].is_object() ||
 		!config.contains("Files") || !config["Files"].is_object()) {
 		return false;
@@ -109,7 +104,6 @@ bool ConfigHandler::validateConfig(const json& config) {
 	const json& paths = config["Paths"];
 	const json& files = config["Files"];
 
-	// Проверка ключей в Paths
 	std::vector<std::string> pathsKeys = {
 		"images_base_directory", "images_save_from_path", "images_save_to_path",
 		"images_recovered_directory", "video_base_directory", "video_input_directory",
@@ -122,7 +116,6 @@ bool ConfigHandler::validateConfig(const json& config) {
 		}
 	}
 
-	// Проверка ключей в Files
 	std::vector<std::string> filesKeys = { "binary_path", "hash_file_path" };
 
 	for (const auto& key : filesKeys) {

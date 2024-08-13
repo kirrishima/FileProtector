@@ -7,13 +7,9 @@
 
 namespace fs = std::filesystem;
 
-/* const std::string imghider::invalidChars = "\\/:*?\"<>|";*/
 namespace imghider {
-	// Набор недопустимых символов для имени файла
-
 
 	bool isValidFileName(const std::string& fileName) {
-		// Используем std::find_first_of для поиска любого из недопустимых символов
 		return std::find_first_of(fileName.begin(), fileName.end(), invalidChars.begin(), invalidChars.end()) == fileName.end();
 	}
 	std::string getUniqueFilename(const std::string& originalFilename) {
@@ -34,7 +30,7 @@ namespace imghider {
 		}
 		catch (const std::exception& e) {
 			printColoredMessage("Ошибка при генерации уникального имени файла: " + std::string(e.what()), CONSOLE_RED);
-			return originalFilename; // fallback to original filename in case of error
+			return originalFilename; // возвращаемся к исходному имени в случае ошибки
 		}
 	}
 
@@ -136,16 +132,15 @@ namespace imghider {
 		}
 		catch (const std::exception& e) {
 			printColoredMessage("Ошибка при разрешении дубликата: " + std::string(e.what()), CONSOLE_RED);
-			return true; // return true to skip the file in case of error
+			return true; // true означает пропуск данного изображения
 		}
 		catch (...) {
 			printColoredMessage("Неизвестная ошибка при разрешении дубликата. Файл пропущен.", CONSOLE_RED);
-			return true; // return true to skip the file in case of error
+			return true; // true означает пропуск данного изображения
 		}
 		return false;
 	}
 
-	// Функция для разделения строки по заданному разделителю
 	std::vector<std::string> split(const std::string& str, char delimiter) {
 		std::vector<std::string> tokens;
 		std::string token;
@@ -156,23 +151,20 @@ namespace imghider {
 		return tokens;
 	}
 
-	// Функция для получения последнего элемента после разделения строки
 	std::string get_last_split_element(const std::string& str, char delimiter) {
 		std::vector<std::string> tokens = split(str, delimiter);
 		if (!tokens.empty()) {
-			return tokens.back(); // Получаем последний элемент
+			return tokens.back();
 		}
 		return "";
 	}
 
-	// Функция для удаления пробелов с начала строки
 	std::string ltrim(const std::string& s) {
 		std::string result = s;
 		result.erase(result.begin(), std::find_if(result.begin(), result.end(), [](unsigned char ch) {return !std::isspace(ch); }));
 		return result;
 	}
 
-	// Функция для удаления пробелов с конца строки
 	std::string rtrim(const std::string& s) {
 		std::string result = s;
 		result.erase(std::find_if(result.rbegin(), result.rend(), [](unsigned char ch) {
@@ -181,7 +173,6 @@ namespace imghider {
 		return result;
 	}
 
-	// Функция для удаления пробелов с начала и конца строки
 	std::string trim(const std::string& s) {
 		return ltrim(rtrim(s));
 	}

@@ -21,7 +21,7 @@ COORD getCursorposition() {
 
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	GetConsoleScreenBufferInfo(hConsole, &csbi);
-	//COORD cursorPos = csbi.dwCursorPosition; 
+
 	return csbi.dwCursorPosition;
 }
 
@@ -63,21 +63,18 @@ void printCentered(const std::string& text, WORD outputColor, std::string end) {
 
 
 int GetConsoleWindowHeight() {
-	// Получаем дескриптор консоли
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	if (hConsole == INVALID_HANDLE_VALUE) {
 		std::cerr << "Не удалось получить дескриптор консоли.\n";
-		return -1; // Возвращаем -1 в случае ошибки
+		return -1;
 	}
 
-	// Структура для хранения информации о буфере экрана
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	if (!GetConsoleScreenBufferInfo(hConsole, &csbi)) {
 		std::cerr << "Не удалось получить информацию о буфере экрана.\n";
-		return -1; // Возвращаем -1 в случае ошибки
+		return -1;
 	}
 
-	// Высота окна в строках
 	int windowHeight = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
 	return windowHeight;
 }
@@ -99,23 +96,20 @@ int GetConsoleWidth() {
 }
 
 void ResizeConsole(int windowHeight, int bufferHeight) {
-	// Получаем дескриптор окна консоли
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	if (hConsole == INVALID_HANDLE_VALUE) {
 		std::cerr << "Не удалось получить дескриптор консоли.\n";
 		return;
 	}
 
-	// Получаем текущую информацию о буфере экрана
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	if (!GetConsoleScreenBufferInfo(hConsole, &csbi)) {
 		std::cerr << "Не удалось получить информацию о буфере экрана.\n";
 		return;
 	}
 
-	int width = csbi.dwSize.X; // Ширина остается прежней
+	int width = csbi.dwSize.X;
 
-	// Устанавливаем новый размер буфера экрана
 	COORD newSize;
 	newSize.X = width;
 	newSize.Y = bufferHeight;
@@ -124,7 +118,6 @@ void ResizeConsole(int windowHeight, int bufferHeight) {
 		return;
 	}
 
-	// Устанавливаем новый размер окна консоли
 	SMALL_RECT windowSize;
 	windowSize.Left = 0;
 	windowSize.Top = 0;
@@ -137,14 +130,12 @@ void ResizeConsole(int windowHeight, int bufferHeight) {
 }
 
 void ResizeConsole(int windowHeight, int windowWidth, int bufferHeight, int bufferWidth) {
-	// Получаем дескриптор окна консоли
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	if (hConsole == INVALID_HANDLE_VALUE) {
 		std::cerr << "Не удалось получить дескриптор консоли.\n";
 		return;
 	}
 
-	// Устанавливаем новый размер буфера экрана
 	COORD newSize;
 	newSize.X = bufferWidth;
 	newSize.Y = bufferHeight;
@@ -153,7 +144,6 @@ void ResizeConsole(int windowHeight, int windowWidth, int bufferHeight, int buff
 		return;
 	}
 
-	// Устанавливаем новый размер окна консоли
 	SMALL_RECT windowSize;
 	windowSize.Left = 0;
 	windowSize.Top = 0;
@@ -166,14 +156,12 @@ void ResizeConsole(int windowHeight, int windowWidth, int bufferHeight, int buff
 }
 
 void SetConsoleFontSize(int fontSizeX, int fontSizeY) {
-	// Получаем дескриптор консоли
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	if (hConsole == INVALID_HANDLE_VALUE) {
 		std::cerr << "Не удалось получить дескриптор консоли.\n";
 		return;
 	}
 
-	// Получаем текущие свойства шрифта
 	CONSOLE_FONT_INFOEX cfi;
 	cfi.cbSize = sizeof(CONSOLE_FONT_INFOEX);
 	if (!GetCurrentConsoleFontEx(hConsole, FALSE, &cfi)) {
@@ -181,7 +169,6 @@ void SetConsoleFontSize(int fontSizeX, int fontSizeY) {
 		return;
 	}
 
-	// Устанавливаем новый размер шрифта
 	cfi.dwFontSize.X = fontSizeX;
 	cfi.dwFontSize.Y = fontSizeY;
 	if (!SetCurrentConsoleFontEx(hConsole, FALSE, &cfi)) {
@@ -191,14 +178,12 @@ void SetConsoleFontSize(int fontSizeX, int fontSizeY) {
 }
 
 std::tuple<short, short> GetConsoleFontSize() {
-	// Получаем дескриптор консоли
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	if (hConsole == INVALID_HANDLE_VALUE) {
 		std::cerr << "Не удалось получить дескриптор консоли.\n";
 		return std::make_tuple(-1, -1);
 	}
 
-	// Получаем текущие свойства шрифта
 	CONSOLE_FONT_INFOEX cfi;
 	cfi.cbSize = sizeof(CONSOLE_FONT_INFOEX);
 

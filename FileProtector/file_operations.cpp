@@ -1,8 +1,4 @@
 ﻿#include "stdafx.h"
-#include "hashing.h"
-//#include "VideoEncryptor.h"
-#include "opencv2/core/mat.hpp"
-#include "opencv2/imgcodecs.hpp"
 
 namespace imghider {
 	bool saveImageToBinary(const std::string& binaryPath, const std::string& imageName, const cv::Mat& image) {
@@ -14,12 +10,10 @@ namespace imghider {
 				return false;
 			}
 
-			// Записываем длину названия изображения и само название
 			size_t imageNameLength = imageName.size();
 			binaryFile.write(reinterpret_cast<const char*>(&imageNameLength), sizeof(size_t));
 			binaryFile.write(imageName.c_str(), imageNameLength);
 
-			// Записываем метаданные
 			int rows = image.rows;
 			int cols = image.cols;
 			int type = image.type();
@@ -28,10 +22,12 @@ namespace imghider {
 			binaryFile.write(reinterpret_cast<const char*>(&cols), sizeof(cols));
 			binaryFile.write(reinterpret_cast<const char*>(&type), sizeof(type));
 
-			// Сжимаем изображение в формате PNG и записываем
+			// Изображение сжимается в исходном формате для экономии памяти
 			std::vector<uchar> buffer;
 			std::string extension = imageName.substr(imageName.find_last_of('.'));
 			cv::imencode(extension, image, buffer);
+
+			// Кодируется часть изображения
 			xorEncryptDecrypt(buffer, ENCRYPTING_KEY);
 			int bufferSize = buffer.size();
 			binaryFile.write(reinterpret_cast<const char*>(&bufferSize), sizeof(bufferSize));
@@ -63,7 +59,6 @@ namespace imghider {
 					try {
 						std::string imagePath = entry.path().string();
 						std::string imageFilename = entry.path().filename().string();
-						/*std::string newImageFilename = imageFilename;*/
 
 						if (!isImageFile(imagePath))
 						{
@@ -71,10 +66,8 @@ namespace imghider {
 							return;
 						}
 						fs::path imgRelPath = fs::relative(entry.path(), fs::path(directoryPath));
-						/*imgRelPath = imgRelPath.parent_path().empty() ? fs::path("") : imgRelPath;*/
 
 						cv::Mat image = cv::imread(imagePath, cv::IMREAD_UNCHANGED);
-
 						if (image.empty()) {
 							printColoredMessage("Ошибка: не удалось загрузить изображение " + imagePath, CONSOLE_RED);
 							continue;
@@ -164,7 +157,7 @@ namespace imghider {
 			else {
 				printColoredMessage("\nВосстановлен файл ", CONSOLE_GREEN, "");
 				printColoredMessage(outputPath.string(), CONSOLE_CYAN);
-			}		
+			}
 			return true;
 		}
 		catch (const std::exception& e) {
@@ -182,51 +175,44 @@ namespace imghider {
 		try {
 			std::ifstream binaryFile(binaryPath, std::ios::in | std::ios::binary);
 
-			// Проверяем, удалось ли открыть файл
 			if (!binaryFile.is_open()) {
 				printColoredMessage("Ошибка: не удалось открыть файл " + binaryPath, CONSOLE_RED);
 				return std::make_tuple(cv::Mat(), std::string(), -1, false);
 			}
 
-			// Перемещаем указатель чтения на заданную начальную позицию
 			binaryFile.seekg(start);
 
-			// Читаем длину имени файла
 			size_t imageNameLength;
 			binaryFile.read(reinterpret_cast<char*>(&imageNameLength), sizeof(size_t));
 
-			// Читаем имя файла
 			std::vector<char> imageNameBuffer(imageNameLength);
 			binaryFile.read(imageNameBuffer.data(), imageNameLength);
 
-			// Декодируем и расшифровываем имя файла
 			std::string imageName(imageNameBuffer.data(), imageNameLength);
 			imageName = RCC::encryptFilename(string_to_wstring(imageName), -RCC_Shift);
 
-			// Читаем метаданные изображения
 			int rows, cols, type;
 			binaryFile.read(reinterpret_cast<char*>(&rows), sizeof(int));
 			binaryFile.read(reinterpret_cast<char*>(&cols), sizeof(int));
 			binaryFile.read(reinterpret_cast<char*>(&type), sizeof(int));
 
-			// Читаем размер буфера и данные изображения
 			int imageDataBufferSize;
 			binaryFile.read(reinterpret_cast<char*>(&imageDataBufferSize), sizeof(int));
 			std::vector<uchar> buffer(imageDataBufferSize);
 			binaryFile.read(reinterpret_cast<char*>(buffer.data()), imageDataBufferSize);
+
+			// Декодируем 
 			xorEncryptDecrypt(buffer, ENCRYPTING_KEY);
-			// Получаем текущую позицию указателя в файле
-			size_t binaryFileTellg = binaryFile.tellg();
+
+			size_t fileEndPos = binaryFile.tellg();
 			binaryFile.close();
 
-			// Декодируем изображение из буфера
 			cv::Mat image = cv::imdecode(buffer, cv::IMREAD_UNCHANGED);
 			if (image.empty() || image.rows != rows || image.cols != cols || image.type() != type) {
-				return std::make_tuple(cv::Mat(), std::string(), binaryFileTellg, false);
+				return std::make_tuple(cv::Mat(), std::string(), fileEndPos, false);
 			}
 
-			// Возвращаем загруженное изображение, имя файла, текущую позицию в файле и флаг успеха
-			return std::make_tuple(image, imageName, binaryFileTellg, true);
+			return std::make_tuple(image, imageName, fileEndPos, true);
 		}
 		catch (const std::ifstream::failure& e) {
 			printColoredMessage("Ошибка при работе с файлом: " + std::string(e.what()), CONSOLE_RED);
@@ -244,7 +230,6 @@ namespace imghider {
 
 	void loadAndSaveImagesFromBinary(const std::string& binaryPath, const std::string& outputDirectory) {
 		try {
-			// Проверяем и создаем пути, если необходимо
 			checkAndCreatePaths({ {outputDirectory, binaryPath} });
 
 			std::ifstream file(binaryPath, std::ios::binary | std::ios::ate);
@@ -258,14 +243,11 @@ namespace imghider {
 			size_t start = 0;
 
 			while (start < fileSize) {
-
 				auto imageData = loadImageFromBinary(binaryPath, start);
 				const cv::Mat& image = std::get<0>(imageData);
 				const std::string imageName = std::get<1>(imageData);
-				//size_t newStart = std::get<2>(imageData);
-				bool success = std::get<3>(imageData);
-
 				start = std::get<2>(imageData);
+				const bool success = std::get<3>(imageData);
 
 				if (!success || image.empty() || imageName.empty()) {
 					printColoredMessage("Ошибка при чтении изображения. Проверьте наличие файла " + binaryPath + ". Возможно, файл поврежден.", CONSOLE_RED);
@@ -431,13 +413,4 @@ namespace imghider {
 
 		return image_extensions.find(extension) != image_extensions.end();
 	}
-	//template<typename... Paths>
-	//std::string createPath(Paths... paths) {
-	//	std::filesystem::path combinedPath;
-	//	((combinedPath /= paths), ...);
-	//	return combinedPath.string();
-	//}
-	//template std::string createPath<std::string>(std::string, std::string);
-	//template std::string createPath<std::string, std::string>(std::string, std::string);
-	//template std::string createPath<std::string, std::string, std::string>(std::string, std::string, std::string);
 }

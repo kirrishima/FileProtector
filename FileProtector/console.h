@@ -8,7 +8,7 @@
 for (int codeId = 0; codeId < 255; codeId++)\
 {\
 	SetConsoleTextAttribute(hConsole, k);\
-	std::cout <<"Color code: "<< k << " I want to be nice today!";\
+	std::cout <<"Color code: "<< k << ". I want to be nice today!";\
 	SetConsoleTextAttribute(hConsole, defaultAttributes);\
 	std::cout << std::endl;\
 }
@@ -59,11 +59,7 @@ extern void SetCursorPosition(int x, int y);
 static WORD defaultAttributes = GetConsoleTextAttribute();
 
 COORD getCursorposition();
-/**
- * @brief Выводит цветную строку на экран
- *
- * @param isError - если true, цвет строки будет красным, иначе зеленым
- */
+
 void printColoredMessage(const std::string& message, WORD outputColor, std::string end = "\n");
 
 void printCentered(const std::string& text, WORD outputColor = CONSOLE_DEFAULT, std::string end = "\n");

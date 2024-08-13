@@ -1,5 +1,4 @@
 ﻿#include "stdafx.h"
-
 #include <cstdint>
 #include <ctime>
 #include <iomanip>

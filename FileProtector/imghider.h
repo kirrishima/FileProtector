@@ -8,7 +8,7 @@
 namespace fs = std::filesystem;
 
 namespace imghider {
-	
+
 	/**
 	*@brief Выводит изображение на экран
 	*
@@ -17,7 +17,7 @@ namespace imghider {
 	*@return Возвращает успешность выполнения кода
 	**/
 	bool displayImage(const cv::Mat& image, const std::string& displayName)noexcept;
-	
+
 	/**
 	 * @brief Находит изображение и выводит на экран, если оно найдено
 	 *
@@ -26,7 +26,7 @@ namespace imghider {
 	 * @return Указывает, было ли найдено изображение
 	 */
 	bool findAndDisplayImage(const std::string& binaryPath, const std::string& searchFilename) noexcept;
-	
+
 	/**
 	 * @brief Находит и возвращает изображение
 	 *
@@ -34,7 +34,7 @@ namespace imghider {
 	 * @param searchFilename: название изображения для поиска
 	 * @param foundImageName: название найденного изображения
 	 * @param exactMatch: если false, будет искать все изображения с searchFilename в названии
-	 * @return возвращает найденное изображение в случае успеха, иначе пустое 
+	 * @return возвращает найденное изображение в случае успеха, иначе пустое
 	 */
 	cv::Mat findImage(const std::string& binaryPath, const std::string& searchFilename, std::string* foundImageName, bool exactMatch = true, const std::string& outputDirectory = "") noexcept;
 
@@ -57,7 +57,7 @@ namespace imghider {
 	* @param hashFilePath: путь к файлу с хэшем названий изображений
 	*/
 	void saveImagesToBinary(const std::string& directoryPath, const std::string& binaryPath, const std::string& hashFilePath);
-	
+
 	/**
 	 * @brief Сохраняет на диске переданное изображение.
 	 *
@@ -67,7 +67,7 @@ namespace imghider {
 	 * @return Успешность сохранения.
 	 */
 	bool saveImage(const cv::Mat image, const fs::path& imageName, const fs::path& outputDirectory) noexcept;
-	
+
 	/**
 	 * @brief Загружает изображение и его метаданные из бинарного файла.
 	 *
@@ -93,12 +93,12 @@ namespace imghider {
 	 */
 	void clearDirectory(const std::string& directoryPath, bool deleteSubfolders = false, bool clearSubfolders = false);
 
-	 /**
-	  * @brief Создает указанные директории и файлы, если их не существует
-	  *
-	  * @param params: структура с параметрами, с полями paths (вектор строк, содержащий пути) и verbose (Флаг для включения/выключения подробного вывода)
-	  * @return указывает, были ли созданы какие-либо директории или файлы
-	  */
+	/**
+	 * @brief Создает указанные директории и файлы, если их не существует
+	 *
+	 * @param params: структура с параметрами, с полями paths (вектор строк, содержащий пути) и verbose (Флаг для включения/выключения подробного вывода)
+	 * @return указывает, были ли созданы какие-либо директории или файлы
+	 */
 	bool checkAndCreatePaths(const std::vector<std::string>& paths, bool verbose = false);
 
 	/**
@@ -136,7 +136,7 @@ namespace imghider {
 	 * @param fileRelPath: Относительный путь изображения, относительно базовой папки для загрузки изображений. Может быть изменен в функции
 	 * @param fileHash: Хэш файла, передается по ссылке, может быть изменен в функции
 	 * @param image: Изображение
-	 * 
+	 *
 	 * @return bool, нужно ли пропустить данное изображение
 	 */
 	bool resolveDuplicate(
@@ -241,14 +241,6 @@ namespace imghider {
 	 * @return Последний элемент после разделения строки, или пустая строка, если строка пустая или не содержит разделителя.
 	 */
 	std::string get_last_split_element(const std::string& str, char delimiter);
-
-
-	template<typename... Paths>
-	std::string createPath(Paths... paths) {
-		std::filesystem::path combinedPath;
-		((combinedPath /= paths), ...);
-		return combinedPath.string();
-	}
 
 	void xorEncryptDecrypt(std::vector<uchar>& data, const std::string& key);
 
