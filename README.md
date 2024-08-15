@@ -190,7 +190,7 @@ This configuration ensures all necessary static libraries and include files are 
 >   - **Library Directories:** `..\x64\{Debug|Release};opencv\build\install\x64\vc17\staticlib;..\HashingLib\OpenSSL\lib`, where `..\x64\{Debug|Release}` is output directory for `HashingLib` and `VideoEncryptorLib` projects.
 >   - **Additional Dependencies:**
 >     - **Debug:** `aded.lib;IlmImfd.lib;ippicvmt.lib;ippiwd.lib;ittnotifyd.lib;libclapackd.lib;libjpeg-turbod.lib;libopenjp2d.lib;libpngd.lib;libprotobufd.lib;libtiffd.lib;libwebpd.lib;opencv_world500d.lib;zlibd.lib;libcrypto.lib;libssl.lib;ws2_32.lib;crypt32.lib;HashingLib.lib;VideoEncryptorLib.lib`
->     - **Release:** `ade.lib;IlmImf.lib;ippicvmt.lib;ippiw.lib;ittnotify.lib;libclapack.lib;libjpeg-turbo.lib;libopenjp2.lib;libpng.lib;libprotobuf.lib;libtiff.lib;libwebp.lib;opencv_world500.lib;zlib.lib;libcrypto.lib;libssl.lib;ws2_32.lib;crypt32.lib;HashingLib.lib;VideoEncryptorLib.lib`
+>     - **Release:** `ade.lib;IlmImf.lib;ippicvmt.lib;ippiw.lib;ittnotify.lib;libclapack.lib;libjpeg-turbo.lib;libopenjp2.lib;libpng.lib;libprotobuf.lib;libtiff.lib;libwebp.lib;opencv_world500.lib;zlib.lib;libcrypto.lib;libssl.lib;ws2_32.lib;crypt32.lib;HashingLib.lib;VideoEncryptorLib.lib`<br>
 > - `HashingLib:`
 >   - **Include Directories:** `OpenSSL\include`
 >   - **Library Directories:** `OpenSSL\lib`
