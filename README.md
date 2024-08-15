@@ -181,8 +181,8 @@ To successfully build the project, use the project properties from the `.props` 
 This configuration ensures all necessary static libraries and include files are correctly referenced for a successful build.
 
 > [!IMPORTANT]\
-> Project uses c++ standard c++20
-> `Runtime Library: Multi-threaded (/MT)`
+> - Project uses c++ standard c++20
+> - Use `Runtime Library: Multi-threaded (/MT)` for correct compilation
 
 > [!NOTE]\
 > You can set up the project props yourself as follows:
