@@ -100,10 +100,11 @@ The FileProtector project aims to secure files through encryption and other prot
 
 ### The project structure is organized as follows:
 
-```
+
 FileEncrypter
 <details>
 <summary>├── FileProtector</summary>
+```
 │   ├── config.cpp
 │   ├── config.h
 │   ├── console.cpp
@@ -141,6 +142,7 @@ FileEncrypter
 │   ├── utils.cpp
 │   ├── x64Debug.props
 │   └── x64Release.props
+```
 </details>
 ├── FileProtector.sln
 ├── HashingLib
@@ -174,7 +176,7 @@ FileEncrypter
         ├── FileProtector.exe
         ├── HashingLib.lib
         └── VideoEncryptorLib.lib
-```
+
 
 ## Building the Project
 
