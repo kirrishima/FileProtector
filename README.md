@@ -98,7 +98,6 @@ The FileProtector project aims to secure files through encryption and other prot
    - **Library Directory:**
      - `OpenSSL\lib`
 
-
 ### The project structure is organized as follows:
 
 ```
@@ -183,6 +182,15 @@ To successfully build the project, use the project properties from the `.props` 
 - **HashingLib**: Uses the `openSSL_x64.props`.
 
 This configuration ensures all necessary static libraries and include files are correctly referenced for a successful build.
+
+> [!IMPORTANT]\
+> You can set up the project props yourself as follows:
+> `FileProtector project:`
+>  - **Include Directories:**  ../HashingLib;../VideoEncryptorLib;opencv\build\install\include;nlohmann;
+>  - **Library Directories:** `..\x64\{Debug|Release};opencv\build\install\x64\vc17\staticlib;..\HashingLib\OpenSSL\lib`, where `..\x64\{Debug|Release}` is output directory for `HashingLib` and `VideoEncryptorLib` projects.
+>  - **Additional Dependencies:**
+>   - **Debug:** `aded.lib;IlmImfd.lib;ippicvmt.lib;ippiwd.lib;ittnotifyd.lib;libclapackd.lib;libjpeg-turbod.lib;libopenjp2d.lib;libpngd.lib;libprotobufd.lib;libtiffd.lib;libwebpd.lib;opencv_world500d.lib;zlibd.lib;libcrypto.lib;libssl.lib;ws2_32.lib;crypt32.lib;HashingLib.lib;VideoEncryptorLib.lib`
+>   - **Release:** `ade.lib;IlmImf.lib;ippicvmt.lib;ippiw.lib;ittnotify.lib;libclapack.lib;libjpeg-turbo.lib;libopenjp2.lib;libpng.lib;libprotobuf.lib;libtiff.lib;libwebp.lib;opencv_world500.lib;zlib.lib;libcrypto.lib;libssl.lib;ws2_32.lib;crypt32.lib;HashingLib.lib;VideoEncryptorLib.lib`
 
 > [!NOTE]\
 > You can change the app icon by copying icons from `FileProtector/icons` to `FileProtector` and renaming it to `icon.ico`.
