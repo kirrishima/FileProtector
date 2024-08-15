@@ -164,12 +164,11 @@ FileEncrypter
 │   ├── VideoEncryptor.cpp
 │   └── VideoEncryptor.h
 └── x64
-    ├── Debug & Release
-    │   ├── FileProtector.exe
-    │   ├── HashingLib.lib
-    │   └── VideoEncryptorLib.lib
+    └── Debug & Release
+        ├── FileProtector.exe
+        ├── HashingLib.lib
+        └── VideoEncryptorLib.lib
 ```
-
 
 ## Building the Project
 
