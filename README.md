@@ -100,139 +100,75 @@ The FileProtector project aims to secure files through encryption and other prot
 
 ### The project structure is organized as follows:
 
-<details>
-<summary>FileEncrypter</summary>
-
-<details>
-<summary>FileProtector</summary>
-
-- `config.cpp`
-- `config.h`
-- `console.cpp`
-- `console.h`
-- `core.cpp`
-- `file_operations.cpp`
-- `hash_operations.cpp`
-- `icon.ico`
-
-    <details>
-    <summary>icons</summary>
-    
-    - `icon.ico`
-    - `icon1.ico`
-    - `icon2.ico`
-    - `icon3.ico`
-    - `icon4.ico`
-    
-    </details>
-
-- `image_display.cpp`
-- `imghider.h`
-- `main.cpp`
-
-    <details>
-    <summary>nlohmann</summary>
-    
-    - `json.hpp`
-    - `json_fwd.hpp`
-    
-    </details>
-
-    <details>
-    <summary>opencv</summary>
-    
-    - `build`
-    
-        <details>
-        <summary>install</summary>
-        
-        - `include`  
-        - `x64`  
-            - `vc17`
-                - `staticlib`
-        
-        </details>
-        
-    </details>
-
-- `Resource.aps`
-- `resource.h`
-- `Resource.rc`
-- `stdafx.cpp`
-- `stdafx.h`
-- `utils.cpp`
-- `x64Debug.props`
-- `x64Release.props`
-
-</details>
-
-- `FileProtector.sln`
-
-<details>
-<summary>HashingLib</summary>
-
-- `framework.h`
-- `hashing.cpp`
-- `hashing.h`
-
-    <details>
-    <summary>OpenSSL</summary>
-    
-    - `include`
-    - `lib`
-    
-    </details>
-
-- `openSSL_x64.props`
-- `pch.cpp`
-- `pch.h`
-
-</details>
-
-<details>
-<summary>Python encoding conversion</summary>
-
-- `main.py`
-- `requirements.txt`
-
-</details>
-
-<details>
-<summary>VideoEncryptorLib</summary>
-
-- `framework.h`
-- `pch.cpp`
-- `pch.h`
-- `rcc.cpp`
-- `VideoEncryptor.cpp`
-- `VideoEncryptor.h`
-
-</details>
-
-<details>
-<summary>x64</summary>
-
-<details>
-<summary>Debug</summary>
-
-- `FileProtector.exe`
-- `HashingLib.lib`
-- `VideoEncryptorLib.lib`
-
-</details>
-
-<details>
-<summary>Release</summary>
-
-- `FileProtector.exe`
-- `HashingLib.lib`
-- `VideoEncryptorLib.lib`
-
-</details>
-
-</details>
-
-</details>
+```
+FileEncrypter
+├── FileProtector
+│   ├── config.cpp
+│   ├── config.h
+│   ├── console.cpp
+│   ├── console.h
+│   ├── core.cpp
+│   ├── file_operations.cpp
+│   ├── hash_operations.cpp
+│   ├── icon.ico
+│   ├── icons
+│   │   ├── icon.ico
+│   │   ├── icon1.ico
+│   │   ├── icon2.ico
+│   │   ├── icon3.ico
+│   │   └── icon4.ico
+│   ├── image_display.cpp
+│   ├── imghider.h
+│   ├── main.cpp
+│   ├── nlohmann
+│   │   ├── json.hpp
+│   │   └── json_fwd.hpp
+│   ├── opencv
+│   │   └── build
+│   │       └── install
+│   │           ├── include
+│   │           │   └── ◯ ◯ ◯
+│   │           └── x64
+│   │               └── vc17
+│   │                   └── staticlib
+│   │                       └── ◯ ◯ ◯
+│   ├── Resource.aps
+│   ├── resource.h
+│   ├── Resource.rc
+│   ├── stdafx.cpp
+│   ├── stdafx.h
+│   ├── utils.cpp
+│   ├── x64Debug.props
+│   └── x64Release.props
+├── FileProtector.sln
+├── HashingLib
+│   ├── framework.h
+│   ├── hashing.cpp
+│   ├── hashing.h
+│   ├── OpenSSL
+│   │   ├── include
+│   │   │   └── ◯ ◯ ◯
+│   │   └── lib
+│   │       └── ◯ ◯ ◯
+│   ├── openSSL_x64.props
+│   ├── pch.cpp
+│   └── pch.h
+├── Python encoding conversion
+│   ├── main.py
+│   └── requirements.txt
+├── VideoEncryptorLib
+│   ├── framework.h
+│   ├── pch.cpp
+│   ├── pch.h
+│   ├── rcc.cpp
+│   ├── VideoEncryptor.cpp
+│   └── VideoEncryptor.h
+└── x64
+    ├── Debug & Release
+    │   ├── FileProtector.exe
+    │   ├── HashingLib.lib
+    │   └── VideoEncryptorLib.lib
+```
 
 
 ## Building the Project
