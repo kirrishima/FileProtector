@@ -45,7 +45,7 @@ The FileProtector project aims to secure files through encryption and other prot
 
 1. [Perl](https://strawberryperl.com/)
 2. [NASM](https://www.nasm.us/)
-3. Microsoft Visual C++ (MSVC) C compiler (included with Visual Studio)
+3. Microsoft Visual C++ (MSVC) C compiler (included with [Visual Studio](https://visualstudio.microsoft.com))
 
 #### Building from Source
 
