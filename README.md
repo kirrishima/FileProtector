@@ -95,7 +95,7 @@ The FileProtector project aims to secure files through encryption and other prot
      - `OpenSSL\lib`
 
 
-The project structure is organized as follows:
+### The project structure is organized as follows:
 
 ```
 FileEncrypter
