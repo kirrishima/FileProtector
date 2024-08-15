@@ -185,7 +185,7 @@ This configuration ensures all necessary static libraries and include files are 
 
 > [!IMPORTANT]\
 > You can set up the project props yourself as follows:
-> `FileProtector project:`
+> `**FileProtector project:**`
 >  - **Include Directories:**  ../HashingLib;../VideoEncryptorLib;opencv\build\install\include;nlohmann;
 >  - **Library Directories:** `..\x64\{Debug|Release};opencv\build\install\x64\vc17\staticlib;..\HashingLib\OpenSSL\lib`, where `..\x64\{Debug|Release}` is output directory for `HashingLib` and `VideoEncryptorLib` projects.
 >  - **Additional Dependencies:**
