@@ -2,8 +2,9 @@
 
 ## Overview
 
+The FileProtector project aims to secure files through encryption and other protective measures. 
 > [!IMPORTANT]\
-> The FileProtector project aims to secure files through encryption and other protective measures. This project relies on several third-party libraries, including OpenCV and OpenSSL, which are compiled from source to create static libraries for use in this project.
+> This project relies on several third-party libraries, including OpenCV and OpenSSL, which are compiled from source to create static libraries for use in this project.
 
 ## Third-Party Libraries
 
