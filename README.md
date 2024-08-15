@@ -102,7 +102,8 @@ The FileProtector project aims to secure files through encryption and other prot
 
 ```
 FileEncrypter
-├── FileProtector
+<details>
+<summary>├── FileProtector</summary>
 │   ├── config.cpp
 │   ├── config.h
 │   ├── console.cpp
@@ -140,6 +141,7 @@ FileEncrypter
 │   ├── utils.cpp
 │   ├── x64Debug.props
 │   └── x64Release.props
+</details>
 ├── FileProtector.sln
 ├── HashingLib
 │   ├── framework.h
@@ -189,7 +191,7 @@ This configuration ensures all necessary static libraries and include files are 
 
 > [!NOTE]\
 > You can set up the project props yourself as follows:
-> -`FileProtector project:`
+> - `FileProtector project:`
 >   - **Include Directories:** ../HashingLib;../VideoEncryptorLib;opencv\build\install\include;nlohmann;
 >   - **Library Directories:** `..\x64\{Debug|Release};opencv\build\install\x64\vc17\staticlib;..\HashingLib\OpenSSL\lib`, where `..\x64\{Debug|Release}` is output directory for `HashingLib` and `VideoEncryptorLib` projects.
 >   - **Additional Dependencies:**
