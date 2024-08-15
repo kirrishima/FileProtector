@@ -2,7 +2,8 @@
 
 ## Overview
 
-The FileProtector project aims to secure files through encryption and other protective measures. This project relies on several third-party libraries, including OpenCV and OpenSSL, which are compiled from source to create static libraries for use in this project.
+> [!IMPORTANT]\
+> The FileProtector project aims to secure files through encryption and other protective measures. This project relies on several third-party libraries, including OpenCV and OpenSSL, which are compiled from source to create static libraries for use in this project.
 
 ## Third-Party Libraries
 
@@ -36,7 +37,7 @@ The FileProtector project aims to secure files through encryption and other prot
      - `install/include/opencv2`
      - `install/x64/vc17/staticlib`
 
-### OpenSSL 3.3.1
+### OpenSSL 3.3.1 is used
 [OpenSSL 3.3.1 Source](https://www.openssl.org/source/)
 
 #### Dependencies
@@ -178,8 +179,9 @@ To successfully build the project, use the project properties from the `.props` 
 
 This configuration ensures all necessary static libraries and include files are correctly referenced for a successful build.
 
-**Note:** You can change the app icon by copying icons from `FileProtector/icons` to `FileProtector` and renaming it to `icon.ico`.
+> [!NOTE]\
+> You can change the app icon by copying icons from `FileProtector/icons` to `FileProtector` and renaming it to `icon.ico`.
 
 ## File Encoding
 
-To successfully upload to GitHub, the file encoding has been changed to UTF-8. If characters appear incorrectly after downloading the repository, run `Python encoding conversion\main.py`, installing reqs from  and select `windows-1251` encoding.
+To successfully upload to GitHub, the file encoding has been changed to UTF-8. If characters appear incorrectly after downloading the repository, run `Python encoding conversion\main.py`, installing requirements.txt and select `windows-1251` encoding.
