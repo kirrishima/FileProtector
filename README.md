@@ -13,7 +13,7 @@ The FileProtector project aims to secure files through encryption and other prot
 
 #### Building from Source
 
-1. **Select the Generator in CMake:**
+1. **Select the Generator in [CMake](https://cmake.org/download):**
    - Choose `Visual Studio 2022` as the generator.
 
 2. **Set the following flags in CMake:**
@@ -45,7 +45,7 @@ The FileProtector project aims to secure files through encryption and other prot
 
 1. [Perl](https://strawberryperl.com/)
 2. [NASM](https://www.nasm.us/)
-3. Microsoft Visual C++ (MSVC) C compiler (included with [Visual Studio](https://visualstudio.microsoft.com))
+3. [Microsoft Visual C++ (MSVC) C compiler](https://visualstudio.microsoft.com/vs/features/cplusplus/) (included with [Visual Studio](https://visualstudio.microsoft.com))
 
 #### Building from Source
 
@@ -53,7 +53,7 @@ The FileProtector project aims to secure files through encryption and other prot
    - Ensure Perl and NASM are in the PATH and accessible from the command line.
 
 2. **Build Steps:**
-   - Open "x64 Native Tools Command Prompt for VS 2022" as an administrator.
+   - Open ["x64 Native Tools Command Prompt for VS 2022"](https://learn.microsoft.com/en-us/visualstudio/ide/reference/command-prompt-powershell?view=vs-2022) as an administrator.
    - Navigate to the OpenSSL directory (e.g., `openssl-3.3.1\openssl-3.3.1`).
    - Execute the following commands:
 
