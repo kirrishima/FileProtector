@@ -411,6 +411,6 @@ namespace imghider {
 
 		std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
 
-		return image_extensions.find(extension) != image_extensions.end();
+		return IMAGE_EXTENSIONS.find(extension) != IMAGE_EXTENSIONS.end();
 	}
 }

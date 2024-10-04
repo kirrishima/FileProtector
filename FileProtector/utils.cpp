@@ -10,7 +10,7 @@ namespace fs = std::filesystem;
 namespace imghider {
 
 	bool isValidFileName(const std::string& fileName) {
-		return std::find_first_of(fileName.begin(), fileName.end(), invalidChars.begin(), invalidChars.end()) == fileName.end();
+		return std::find_first_of(fileName.begin(), fileName.end(), INVALID_FILEPATH_CHARS.begin(), INVALID_FILEPATH_CHARS.end()) == fileName.end();
 	}
 	std::string getUniqueFilename(const std::string& originalFilename) {
 		try {
@@ -96,7 +96,7 @@ namespace imghider {
 							{
 								while (newFilename.empty() || newFilename == "" || !isValidFileName(newFilename))
 								{
-									printColoredMessage("\nИмя файла не должно содержать следующих символов: " + invalidChars + "\nПовторите ввод: ", CONSOLE_DARK_YELLOW, "");
+									printColoredMessage("\nИмя файла не должно содержать следующих символов: " + INVALID_FILEPATH_CHARS + "\nПовторите ввод: ", CONSOLE_DARK_YELLOW, "");
 									std::getline(std::cin, newFilename);
 
 								}

@@ -29,7 +29,7 @@ bool authenticateUser() {
 	std::getline(std::cin, pswd);
 	if (pswd != PASSWORD) {
 
-		std::cout << "Добро пожаловать!\nТекущий пароль:\nСписок просмотра:\nhttps://open.spotify.com/track/5ucIAerBlXCrES9RNEGNzH?si=30a9324a1cd34b31\n";
+		std::cout << "Добро пожаловать!\nСписок просмотра:\nhttps://open.spotify.com/track/5ucIAerBlXCrES9RNEGNzH?si=30a9324a1cd34b31\n";
 		system("pause");
 		return false;
 	}
@@ -84,7 +84,7 @@ int main() {
 
 void configureFromJson() {
 	std::cout << std::endl;
-	json config = ConfigHandler::loadConfig(ConfigHandler::defaultConfigFilePath);
+	json config = ConfigHandler::loadConfig(ConfigHandler::DEFAULT_CONFIG_FILEPATH);
 
 	const json& paths = config["Paths"];
 	const json& files = config["Files"];
@@ -136,7 +136,7 @@ void handleUserInput(int userInput) {
 		std::getline(std::cin, searchFilename);
 		if (!imghider::isValidFileName(searchFilename) || searchFilename.empty())
 		{
-			printColoredMessage("Некорректное имя файла. Название не должно содержать след. символов: " + imghider::invalidChars, CONSOLE_RED);
+			printColoredMessage("Некорректное имя файла. Название не должно содержать след. символов: " + imghider::INVALID_FILEPATH_CHARS, CONSOLE_RED);
 			break;
 		}
 		printColoredMessage("\nИдет поиск...\n", CONSOLE_CYAN);
@@ -159,7 +159,7 @@ void handleUserInput(int userInput) {
 		configureFromJson();
 		break;
 	case 10:
-		ConfigHandler::createDefaultConfigFile(ConfigHandler::defaultConfigFilePath);
+		ConfigHandler::createDefaultConfigFile(ConfigHandler::DEFAULT_CONFIG_FILEPATH);
 		break;
 	case (int)'h':
 		printHelp();

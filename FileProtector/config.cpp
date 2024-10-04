@@ -2,7 +2,7 @@
 #include "config.h"
 #include <format>
 
-const std::string ConfigHandler::defaultConfigFilePath = "config.json"; // Стандартный путь и название
+const std::string ConfigHandler::DEFAULT_CONFIG_FILEPATH = "config.json"; // Стандартный путь и название
 
 json ConfigHandler::getDefaultConfig() {
 	return json{
