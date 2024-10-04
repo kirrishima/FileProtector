@@ -2,7 +2,9 @@
 
 ## Overview
 
-The FileProtector project aims to secure files through encryption and other protective measures. This project relies on several third-party libraries, including OpenCV and OpenSSL, which are compiled from source to create static libraries for use in this project.
+The FileProtector project aims to secure files through encryption and other protective measures. 
+> [!IMPORTANT]\
+> This project relies on several third-party libraries, including `nlohmann/json`, `OpenCV` and `OpenSSL`, which are compiled from source to create static libraries for use in this project. 
 
 ## Third-Party Libraries
 
@@ -11,7 +13,7 @@ The FileProtector project aims to secure files through encryption and other prot
 
 #### Building from Source
 
-1. **Select the Generator in CMake:**
+1. **Select the Generator in [CMake](https://cmake.org/download):**
    - Choose `Visual Studio 2022` as the generator.
 
 2. **Set the following flags in CMake:**
@@ -36,14 +38,14 @@ The FileProtector project aims to secure files through encryption and other prot
      - `install/include/opencv2`
      - `install/x64/vc17/staticlib`
 
-### OpenSSL 3.3.1
+### OpenSSL 3.3.1 is used
 [OpenSSL 3.3.1 Source](https://www.openssl.org/source/)
 
 #### Dependencies
 
 1. [Perl](https://strawberryperl.com/)
 2. [NASM](https://www.nasm.us/)
-3. Microsoft Visual C++ (MSVC) C compiler (included with Visual Studio)
+3. [Microsoft Visual C++ (MSVC) C compiler](https://visualstudio.microsoft.com/vs/features/cplusplus/) (included with [Visual Studio](https://visualstudio.microsoft.com))
 
 #### Building from Source
 
@@ -51,7 +53,7 @@ The FileProtector project aims to secure files through encryption and other prot
    - Ensure Perl and NASM are in the PATH and accessible from the command line.
 
 2. **Build Steps:**
-   - Open "x64 Native Tools Command Prompt for VS 2022" as an administrator.
+   - Open ["x64 Native Tools Command Prompt for VS 2022"](https://learn.microsoft.com/en-us/visualstudio/ide/reference/command-prompt-powershell?view=vs-2022) as an administrator.
    - Navigate to the OpenSSL directory (e.g., `openssl-3.3.1\openssl-3.3.1`).
    - Execute the following commands:
 
@@ -71,6 +73,10 @@ The FileProtector project aims to secure files through encryption and other prot
    nmake test
    nmake install
    ```
+
+### nlohmann/json
+
+[nlohmann/json](https://github.com/nlohmann/json) is single header file library, no compilation needed.
 
 ## Project Structure
 
@@ -92,8 +98,7 @@ The FileProtector project aims to secure files through encryption and other prot
    - **Library Directory:**
      - `OpenSSL\lib`
 
-
-The project structure is organized as follows:
+### The project structure is organized as follows:
 
 ```
 FileEncrypter
@@ -159,11 +164,7 @@ FileEncrypter
 │   ├── VideoEncryptor.cpp
 │   └── VideoEncryptor.h
 └── x64
-    ├── Debug
-    │   ├── FileProtector.exe
-    │   ├── HashingLib.lib
-    │   └── VideoEncryptorLib.lib
-    └── Release
+    └── Debug & Release
         ├── FileProtector.exe
         ├── HashingLib.lib
         └── VideoEncryptorLib.lib
@@ -178,6 +179,25 @@ To successfully build the project, use the project properties from the `.props` 
 
 This configuration ensures all necessary static libraries and include files are correctly referenced for a successful build.
 
+> [!IMPORTANT]\
+>  Project uses c++ standard c++20<br>
+>  Use `Runtime Library: Multi-threaded (/MT)` for correct compilation
+
+> [!NOTE]\
+> You can set up the project props yourself as follows:
+> - `FileProtector project:`
+>   - **Include Directories:** ../HashingLib;../VideoEncryptorLib;opencv\build\install\include;nlohmann;
+>   - **Library Directories:** `..\x64\{Debug|Release};opencv\build\install\x64\vc17\staticlib;..\HashingLib\OpenSSL\lib`, where `..\x64\{Debug|Release}` is output directory for `HashingLib` and `VideoEncryptorLib` projects.
+>   - **Additional Dependencies:**
+>     - **Debug:** `aded.lib;IlmImfd.lib;ippicvmt.lib;ippiwd.lib;ittnotifyd.lib;libclapackd.lib;libjpeg-turbod.lib;libopenjp2d.lib;libpngd.lib;libprotobufd.lib;libtiffd.lib;libwebpd.lib;opencv_world500d.lib;zlibd.lib;libcrypto.lib;libssl.lib;ws2_32.lib;crypt32.lib;HashingLib.lib;VideoEncryptorLib.lib`
+>     - **Release:** `ade.lib;IlmImf.lib;ippicvmt.lib;ippiw.lib;ittnotify.lib;libclapack.lib;libjpeg-turbo.lib;libopenjp2.lib;libpng.lib;libprotobuf.lib;libtiff.lib;libwebp.lib;opencv_world500.lib;zlib.lib;libcrypto.lib;libssl.lib;ws2_32.lib;crypt32.lib;HashingLib.lib;VideoEncryptorLib.lib`
+> - `HashingLib:`
+>   - **Include Directories:** `OpenSSL\include`
+>   - **Library Directories:** `OpenSSL\lib`
+
+> [!NOTE]\
+> You can change the app icon by copying icons from `FileProtector/icons` to `FileProtector` and renaming it to `icon.ico`.
+
 ## File Encoding
 
-To successfully upload to GitHub, the file encoding has been changed to UTF-8. If characters appear incorrectly after downloading the repository, run `Python encoding conversion\main.py`, installing reqs from  and select `windows-1251` encoding.
+To successfully upload to GitHub, the file encoding has been changed to UTF-8. If characters appear incorrectly after downloading the repository, run `Python encoding conversion\main.py`, installing requirements.txt and select `windows-1251` encoding.
