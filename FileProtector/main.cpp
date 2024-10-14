@@ -255,16 +255,17 @@ void showDeletionMenu() {
 
 		int choice = getUserChoice();
 
-		while (choice < 1 || choice > 12)
-		{
-			printColoredMessage("Некорректный ввод", CONSOLE_RED);
-			choice = getUserChoice();
-			continue;
-		}
 
 		if (choice == -1)
 		{
 			exitFlag = true;
+			continue;
+		}
+
+		while (choice < 1 || choice > 12)
+		{
+			printColoredMessage("Некорректный ввод", CONSOLE_RED);
+			choice = getUserChoice();
 			continue;
 		}
 
