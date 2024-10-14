@@ -254,6 +254,14 @@ void showDeletionMenu() {
 		std::cout << "12) Удалить несохраненные изображения и видео из " << imagesSaveFromPath + " И " + videoInputPath << std::endl;
 
 		int choice = getUserChoice();
+
+		while (choice < 1 || choice > 12)
+		{
+			printColoredMessage("Некорректный ввод", CONSOLE_RED);
+			choice = getUserChoice();
+			continue;
+		}
+
 		if (choice == -1)
 		{
 			exitFlag = true;
@@ -284,13 +292,13 @@ void showDeletionMenu() {
 			imghider::clearDirectory(imagesBaseDirectory, true);
 			break;
 		case 2:
-			imghider::clearDirectory(imagesRecoveredDirectory);
+			imghider::clearDirectory(imagesRecoveredDirectory, true);
 			break;
 		case 3:
 			imghider::clearDirectory(imagesSaveToPath);
 			break;
 		case 4:
-			imghider::clearDirectory(imagesSaveFromPath);
+			imghider::clearDirectory(imagesSaveFromPath, true);
 			break;
 		case 5:
 			imghider::clearDirectory(videoBaseDirectory, true);
@@ -310,9 +318,9 @@ void showDeletionMenu() {
 			imghider::clearDirectory(videoBaseDirectory, true);
 			break;
 		case 10:
-			imghider::clearDirectory(imagesRecoveredDirectory);
+			imghider::clearDirectory(imagesRecoveredDirectory, true);
 			std::cout << std::endl;
-			imghider::clearDirectory(videoRecoveredDirectory);
+			imghider::clearDirectory(videoRecoveredDirectory, true);
 			break;
 		case 11:
 			imghider::clearDirectory(imagesSaveToPath);
@@ -320,9 +328,9 @@ void showDeletionMenu() {
 			imghider::clearDirectory(videoEncryptedPath);
 			break;
 		case 12:
-			imghider::clearDirectory(imagesSaveFromPath);
+			imghider::clearDirectory(imagesSaveFromPath, true);
 			std::cout << std::endl;
-			imghider::clearDirectory(videoInputPath);
+			imghider::clearDirectory(videoInputPath, true);
 			break;
 		default:
 			std::cout << "Некорректный ввод\n";
