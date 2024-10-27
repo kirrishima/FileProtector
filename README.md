@@ -2,7 +2,7 @@
 
 ## Overview
 
-The FileProtector project aims to secure files through encryption and other protective measures. 
+The FileProtector project aims to secure files through encryption and other protective measures. Set up [FileProtector/config.h](https://github.com/kirrishima/FileProtector/tree/main/FileProtector/config.h) before building with your credentials.
 > [!IMPORTANT]\
 > This project relies on several third-party libraries, including `nlohmann/json`, `OpenCV` and `OpenSSL`, which are compiled from source to create static libraries for use in this project. 
 
