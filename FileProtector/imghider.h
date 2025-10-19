@@ -69,6 +69,29 @@ namespace imghider {
 	bool saveImage(const cv::Mat image, const fs::path& imageName, const fs::path& outputDirectory) noexcept;
 
 	/**
+	 * @brief Структура с именованными полями метаданных изображения в бинарном файле.
+	 */
+	struct ImageMetadata {
+		std::string name;         // имя файла изображения (после RCC::encryptFilename(..., -RCC_Shift))
+		size_t bufferStartPos;    // позиция в файле, где начинается буфер изображения (начало байтов изображения)
+		size_t fileEndPos;        // позиция в файле сразу после буфера изображения (новый start для следующей записи)
+		int rows;                 // ожидаемое количество строк изображения
+		int cols;                 // ожидаемое количество столбцов изображения
+		int type;                 // ожидаемый тип cv::Mat (image.type())
+		int bufferSize;           // размер буфера изображения (в байтах)
+	};
+
+	/**
+	 * @brief Читает только метаданные записи изображения из бинарного файла
+	 *
+	 * @param binaryPath: Путь к бинарному файлу, из которого будут читаться метаданные.
+	 * @param start: Начальная позиция в бинарном файле, с которой начнется чтение метаданных.
+	 * @return std::optional<ImageMetadata> - std::nullopt в случае ошибки, иначе - структура метаданных.
+	 */
+	std::optional<ImageMetadata> loadImageMetadataFromBinary(const std::string& binaryPath, const size_t start) noexcept;
+
+
+	/**
 	 * @brief Загружает изображение и его метаданные из бинарного файла.
 	 *
 	 * @param binaryPath: Путь к бинарному файлу, из которого будет загружаться изображение.

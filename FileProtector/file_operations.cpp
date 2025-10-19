@@ -22,12 +22,10 @@ namespace imghider {
 			binaryFile.write(reinterpret_cast<const char*>(&cols), sizeof(cols));
 			binaryFile.write(reinterpret_cast<const char*>(&type), sizeof(type));
 
-			// Изображение сжимается в исходном формате для экономии памяти
 			std::vector<uchar> buffer;
 			std::string extension = imageName.substr(imageName.find_last_of('.'));
 			cv::imencode(extension, image, buffer);
 
-			// Кодируется часть изображения
 			xorEncryptDecrypt(buffer, ENCRYPTING_KEY);
 			int bufferSize = buffer.size();
 			binaryFile.write(reinterpret_cast<const char*>(&bufferSize), sizeof(bufferSize));
@@ -171,48 +169,160 @@ namespace imghider {
 
 	}
 
-	std::tuple<cv::Mat, std::string, size_t, bool> loadImageFromBinary(const std::string& binaryPath, const size_t start) {
+	std::optional<ImageMetadata> loadImageMetadataFromBinary(const std::string& binaryPath, const size_t start) noexcept
+	{
 		try {
 			std::ifstream binaryFile(binaryPath, std::ios::in | std::ios::binary);
-
 			if (!binaryFile.is_open()) {
 				printColoredMessage("Ошибка: не удалось открыть файл " + binaryPath, CONSOLE_RED);
-				return std::make_tuple(cv::Mat(), std::string(), -1, false);
+				return std::nullopt;
 			}
 
-			binaryFile.seekg(start);
+			auto make_error_and_close_file = [&](const char* msg = nullptr) -> std::optional<ImageMetadata> {
+				if (msg) printColoredMessage(std::string("Ошибка (метаданные): ") + msg, CONSOLE_RED);
+				binaryFile.close();
+				return std::nullopt;
+				};
 
-			size_t imageNameLength;
+			binaryFile.seekg(0, std::ios::end);
+			std::streampos t = binaryFile.tellg();
+			if (t == static_cast<std::streampos>(-1)) return make_error_and_close_file("Не удалось определить размер файла");
+			size_t fileSize = static_cast<size_t>(t);
+
+			if (start >= fileSize) {
+				return make_error_and_close_file("start >= fileSize");
+			}
+
+			binaryFile.seekg(static_cast<std::streamoff>(start), std::ios::beg);
+			if (!binaryFile.good()) return make_error_and_close_file("seekg(start) неудачен");
+
+			size_t imageNameLength = 0;
 			binaryFile.read(reinterpret_cast<char*>(&imageNameLength), sizeof(size_t));
+			if (!binaryFile.good()) return make_error_and_close_file("Не удалось прочитать длину имени");
+
+			const size_t MAX_NAME_LEN = 1 << 20;
+			if (imageNameLength == 0 || imageNameLength > MAX_NAME_LEN) {
+				return make_error_and_close_file("Неверная длина имени");
+			}
+
+			size_t minimalNeeded = sizeof(size_t) + imageNameLength + 3 * sizeof(int) + sizeof(int);
+			if (start + minimalNeeded > fileSize) {
+				return make_error_and_close_file("Недостаточно байт для чтения заголовка");
+			}
 
 			std::vector<char> imageNameBuffer(imageNameLength);
-			binaryFile.read(imageNameBuffer.data(), imageNameLength);
+			binaryFile.read(imageNameBuffer.data(), static_cast<std::streamsize>(imageNameLength));
+			if (!binaryFile.good()) return make_error_and_close_file("Не удалось прочитать имя");
 
-			std::string imageName(imageNameBuffer.data(), imageNameLength);
-			imageName = RCC::encryptFilename(string_to_wstring(imageName), -RCC_Shift);
+			std::string rawImageName(imageNameBuffer.data(), imageNameLength);
+			std::string imageName = RCC::encryptFilename(string_to_wstring(rawImageName), -RCC_Shift);
 
-			int rows, cols, type;
+			int rows = 0, cols = 0, type = 0;
 			binaryFile.read(reinterpret_cast<char*>(&rows), sizeof(int));
 			binaryFile.read(reinterpret_cast<char*>(&cols), sizeof(int));
 			binaryFile.read(reinterpret_cast<char*>(&type), sizeof(int));
+			if (!binaryFile.good()) return make_error_and_close_file("Не удалось прочитать rows/cols/type");
 
-			int imageDataBufferSize;
+			int imageDataBufferSize = 0;
 			binaryFile.read(reinterpret_cast<char*>(&imageDataBufferSize), sizeof(int));
-			std::vector<uchar> buffer(imageDataBufferSize);
-			binaryFile.read(reinterpret_cast<char*>(buffer.data()), imageDataBufferSize);
+			if (!binaryFile.good() || imageDataBufferSize < 0) return make_error_and_close_file("Неверный imageDataBufferSize");
 
-			// Декодируем 
-			xorEncryptDecrypt(buffer, ENCRYPTING_KEY);
+			std::streampos curPos = binaryFile.tellg();
+			if (curPos == static_cast<std::streampos>(-1)) return make_error_and_close_file("tellg() не удался");
+			size_t bufferStartPos = static_cast<size_t>(curPos);
 
-			size_t fileEndPos = binaryFile.tellg();
-			binaryFile.close();
-
-			cv::Mat image = cv::imdecode(buffer, cv::IMREAD_UNCHANGED);
-			if (image.empty() || image.rows != rows || image.cols != cols || image.type() != type) {
-				return std::make_tuple(cv::Mat(), std::string(), fileEndPos, false);
+			if (bufferStartPos + static_cast<size_t>(imageDataBufferSize) > fileSize) {
+				return make_error_and_close_file("Буфер изображения выходит за пределы файла");
 			}
 
-			return std::make_tuple(image, imageName, fileEndPos, true);
+			size_t fileEndPos = bufferStartPos + static_cast<size_t>(imageDataBufferSize);
+
+			ImageMetadata meta;
+			meta.name = std::move(imageName);
+			meta.bufferStartPos = bufferStartPos;
+			meta.fileEndPos = fileEndPos;
+			meta.rows = rows;
+			meta.cols = cols;
+			meta.type = type;
+			meta.bufferSize = imageDataBufferSize;
+
+			binaryFile.close();
+			return meta;
+		}
+		catch (const std::ifstream::failure& e) {
+			printColoredMessage("Ошибка при работе с файлом (метаданные): " + std::string(e.what()), CONSOLE_RED);
+			return std::nullopt;
+		}
+		catch (const std::exception& e) {
+			printColoredMessage("Общая ошибка (метаданные): " + std::string(e.what()), CONSOLE_RED);
+			return std::nullopt;
+		}
+		catch (...) {
+			printColoredMessage("Неизвестная ошибка (метаданные).", CONSOLE_RED);
+			return std::nullopt;
+		}
+	}
+
+	/**
+	 * @brief Загружает изображение из бинарного файла (использует loadImageMetadataFromBinary для парсинга метаданных).
+	 *
+	 * @param binaryPath: Путь к бинарному файлу.
+	 * @param start: Начальная позиция в бинарном файле, с которой начинается запись изображения.
+	 * @return std::tuple<cv::Mat, std::string, size_t, bool>
+	 *         Кортеж содержащий:
+	 *           - cv::Mat изображения (пустой, если не удалось загрузить),
+	 *           - название изображения (после преобразования),
+	 *           - позицию в файле после чтения (т.е. fileEndPos),
+	 *           - флаг успеха.
+	 */
+	std::tuple<cv::Mat, std::string, size_t, bool> loadImageFromBinary(const std::string& binaryPath, const size_t start) {
+		try {
+			// локальный хелпер для единообразного возврата ошибки
+			auto make_error = [&](size_t retPos) {
+				return std::make_tuple(cv::Mat(), std::string(), retPos, false);
+				};
+
+			// Получаем метаданные (читаем быстро, без загрузки буфера)
+			auto metaOpt = loadImageMetadataFromBinary(binaryPath, start);
+			if (!metaOpt.has_value()) {
+				return make_error(start);
+			}
+			ImageMetadata meta = *metaOpt;
+
+			// Открываем файл и читаем буфер изображения (начиная с bufferStartPos)
+			std::ifstream binaryFile(binaryPath, std::ios::in | std::ios::binary);
+			if (!binaryFile.is_open()) {
+				printColoredMessage("Ошибка: не удалось открыть файл " + binaryPath, CONSOLE_RED);
+				return make_error(start);
+			}
+
+			binaryFile.seekg(static_cast<std::streamoff>(meta.bufferStartPos), std::ios::beg);
+			if (!binaryFile.good()) {
+				binaryFile.close();
+				return make_error(start);
+			}
+
+			std::vector<uchar> buffer(static_cast<size_t>(meta.bufferSize));
+			if (meta.bufferSize > 0) {
+				binaryFile.read(reinterpret_cast<char*>(buffer.data()), static_cast<std::streamsize>(meta.bufferSize));
+				if (!binaryFile.good()) {
+					binaryFile.close();
+					return make_error(start);
+				}
+			}
+
+			size_t fileEndPos = meta.fileEndPos;
+			binaryFile.close();
+
+			// Декодирование / расшифровка
+			xorEncryptDecrypt(buffer, ENCRYPTING_KEY);
+
+			cv::Mat image = cv::imdecode(buffer, cv::IMREAD_UNCHANGED);
+			if (image.empty() || image.rows != meta.rows || image.cols != meta.cols || image.type() != meta.type) {
+				return std::make_tuple(cv::Mat(), meta.name, fileEndPos, false);
+			}
+
+			return std::make_tuple(image, meta.name, fileEndPos, true);
 		}
 		catch (const std::ifstream::failure& e) {
 			printColoredMessage("Ошибка при работе с файлом: " + std::string(e.what()), CONSOLE_RED);
