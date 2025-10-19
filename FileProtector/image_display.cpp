@@ -68,7 +68,8 @@ namespace imghider {
 						printColoredMessage("Ошибка при чтении изображения из \"" + binaryPath + "\".", CONSOLE_RED);
 						return cv::Mat();
 					}
-					if (exactMatch && fs::path(imageName).filename().string() == searchFilename) {
+
+					if (exactMatch && imageName == searchFilename) {
 						if (foundImageName != nullptr)
 							*foundImageName = imageName;
 						cachedImageName = imageName;
