@@ -63,7 +63,7 @@ namespace imghider {
 						if (!isImageFile(imagePath))
 						{
 							printColoredMessage("\nФайл " + imagePath + " пропущен, так как его расширение не поддерживается.", CONSOLE_DARK_YELLOW);
-							return;
+							continue;
 						}
 						fs::path imgRelPath = fs::relative(entry.path(), fs::path(directoryPath));
 
