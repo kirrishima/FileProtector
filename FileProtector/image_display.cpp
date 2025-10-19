@@ -105,8 +105,8 @@ namespace imghider {
 				}
 
 				// Нечёткий поиск (по подстроке) — сравнение имён в нижнем регистре
+				// Нечёткий поиск (по подстроке) — сравнение по всей строке пути в нижнем регистре
 				{
-					// получаем только файл имя (без пути)
 					std::wstring lowercaseImageName = string_to_wstring(meta.name);
 					std::wstring lowercaseSearchFilename = string_to_wstring(searchFilename);
 
@@ -115,7 +115,8 @@ namespace imghider {
 
 					if (lowercaseImageName.find(lowercaseSearchFilename) != std::wstring::npos)
 					{
-						// нашли совпадение по подстроке — загружаем изображение и сохраняем результат
+						// нашли совпадение по подстроке — загружаем изображение и сохраняем результат,
+						// восстанавливая исходную файловую структуру
 						auto imageTuple = loadImageFromBinary(binaryPath, start);
 						cv::Mat image;
 						std::string loadedName;
@@ -125,20 +126,46 @@ namespace imghider {
 
 						if (!success) {
 							printColoredMessage("Ошибка при загрузке изображения (для сохранения результатов поиска).", CONSOLE_RED);
-							// продолжаем обработку следующих записей, не прерываем весь цикл
+							// продолжаем обработку следующих записей
 						}
 						else {
-							// сохраняем найденное изображение в папку результатов
 							try {
-								saveImage(
-									image,
-									fs::path(loadedName).filename().string(),
-									fs::path(outputDirectory) / fs::path("search results for " + searchFilename)
-								);
+								// Оригинальный путь (в виде строки) — может быть относительным или абсолютным
+								fs::path originalPath = fs::path(loadedName);
+
+								// Получаем "относительную" часть пути:
+								// - если originalPath абсолютный, relativePath будет без root_name/root_directory (т.е. без диска)
+								// - если относительный — используем его как есть
+								fs::path relativePath = originalPath.is_absolute() ? originalPath.relative_path() : originalPath;
+
+								// Базовая папка результатов для этого поиска
+								fs::path resultsBase = fs::path(outputDirectory) / fs::path("search results for " + searchFilename);
+
+								// Целевая директория — повторяем оригинальную структуру (без имени файла)
+								fs::path targetDir = resultsBase / relativePath.parent_path();
+
+								// Создаем директории рекурсивно (без исключений)
+								std::error_code ec;
+								if (!targetDir.empty()) {
+									fs::create_directories(targetDir, ec);
+								}
+								else {
+									// если parent_path() пуст — используем resultsBase
+									fs::create_directories(resultsBase, ec);
+									targetDir = resultsBase;
+								}
+
+								if (ec) {
+									printColoredMessage("Не удалось создать директорию для сохранения: " + targetDir.string() + " : " + ec.message(), CONSOLE_RED);
+								}
+								else {
+									// Сохраняем с оригинальным именем файла в восстановленной структуре
+									std::string filenameOnly = fs::path(loadedName).filename().string();
+									saveImage(image, filenameOnly, targetDir);
+								}
 							}
 							catch (const std::exception& e) {
 								printColoredMessage("Ошибка при сохранении найденного изображения: " + std::string(e.what()), CONSOLE_RED);
-								// не прерываем — продолжаем дальше
 							}
 							catch (...) {
 								printColoredMessage("Неизвестная ошибка при сохранении найденного изображения.", CONSOLE_RED);
@@ -146,6 +173,7 @@ namespace imghider {
 						}
 					}
 				}
+
 
 				// Продвигаем start на позицию следующей записи (fileEndPos из метаданных)
 				start = meta.fileEndPos;
