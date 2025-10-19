@@ -34,50 +34,80 @@ namespace imghider {
 		return true;
 	}
 
-	cv::Mat findImage(const std::string& binaryPath, const std::string& searchFilename, std::string* foundImageName, bool exactMatch, const std::string& outputDirectory) noexcept {
+	cv::Mat findImage(const std::string& binaryPath,
+		const std::string& searchFilename,
+		std::string* foundImageName,
+		bool exactMatch,
+		const std::string& outputDirectory) noexcept
+	{
 		try {
+			// Локальный хелпер для единообразного сообщения об ошибке и возврата пустой матрицы
+			auto make_error_mat = [&](const std::string& msg = std::string()) -> cv::Mat {
+				if (!msg.empty()) printColoredMessage(msg, CONSOLE_RED);
+				return cv::Mat();
+				};
+
 			std::ifstream file(binaryPath, std::ios::binary | std::ios::ate);
 			if (!file.is_open()) {
-				printColoredMessage("Ошибка: не удалось открыть файл " + binaryPath, CONSOLE_RED);
-				return cv::Mat();
+				return make_error_mat("Ошибка: не удалось открыть файл " + binaryPath);
 			}
 
 			static cv::Mat cachedImage;
 			static std::string cachedImageName;
 
-			if (exactMatch && !cachedImage.empty() && !cachedImageName.empty() && cachedImageName == searchFilename)
-			{
+			if (exactMatch && !cachedImage.empty() && !cachedImageName.empty() && cachedImageName == searchFilename) {
 				printColoredMessage("\nБыло использовано изображение \"" + cachedImageName + "\" найденное при прошлом поиске", CONSOLE_DARK_YELLOW);
 				if (foundImageName != nullptr)
 					*foundImageName = cachedImageName;
 				return cachedImage;
 			}
+
+			// размер файла
+			std::streampos tp = file.tellg();
+			if (tp == static_cast<std::streampos>(-1)) {
+				file.close();
+				return make_error_mat("Не удалось определить размер файла: " + binaryPath);
+			}
 			size_t fileSize = file.tellg();
 			file.close();
-			size_t start = 0;
 
+			size_t start = 0;
 			while (start < fileSize) {
-				try {
-					auto imageData = loadImageFromBinary(binaryPath, start);
-					const cv::Mat image = std::get<0>(imageData);
-					const std::string& imageName = std::get<1>(imageData);
-					size_t newStart = std::get<2>(imageData);
-					bool success = std::get<3>(imageData);
+				// получаем метаданные (без чтения буфера изображения)
+				auto metaOpt = loadImageMetadataFromBinary(binaryPath, start);
+				if (!metaOpt.has_value()) {
+					// Ошибка при чтении метаданных — логируем и завершаем
+					printColoredMessage("Ошибка при чтении метаданных из \"" + binaryPath + "\".", CONSOLE_RED);
+					return cv::Mat();
+				}
+				ImageMetadata meta = *metaOpt;
+
+				// точное совпадение имени
+				if (exactMatch && meta.name == searchFilename) {
+					// загружаем полное изображение только сейчас
+					auto imageTuple = loadImageFromBinary(binaryPath, start);
+					// структурированное привязывание (c++17)
+					cv::Mat image;
+					std::string loadedName;
+					size_t fileEndPos = start;
+					bool success;
+					std::tie(image, loadedName, fileEndPos, success) = imageTuple;
 
 					if (!success) {
-						printColoredMessage("Ошибка при чтении изображения из \"" + binaryPath + "\".", CONSOLE_RED);
+						printColoredMessage("Ошибка при загрузке изображения для полного совпадения.", CONSOLE_RED);
 						return cv::Mat();
 					}
 
-					if (exactMatch && imageName == searchFilename) {
-						if (foundImageName != nullptr)
-							*foundImageName = imageName;
-						cachedImageName = imageName;
-						cachedImage = image;
-						return image;
-					}
+					if (foundImageName != nullptr) *foundImageName = loadedName;
+					cachedImageName = loadedName;
+					cachedImage = image;
+					return image;
+				}
 
-					std::wstring lowercaseImageName = fs::path(imageName).filename().wstring();
+				// Нечёткий поиск (по подстроке) — сравнение имён в нижнем регистре
+				{
+					// получаем только файл имя (без пути)
+					std::wstring lowercaseImageName = string_to_wstring(meta.name);
 					std::wstring lowercaseSearchFilename = string_to_wstring(searchFilename);
 
 					std::transform(lowercaseImageName.begin(), lowercaseImageName.end(), lowercaseImageName.begin(), towlower);
@@ -85,23 +115,43 @@ namespace imghider {
 
 					if (lowercaseImageName.find(lowercaseSearchFilename) != std::wstring::npos)
 					{
-						saveImage(
-							image,
-							fs::path(imageName).filename().string(),
-							fs::path(outputDirectory) / fs::path("search results for " + searchFilename)
-						);
+						// нашли совпадение по подстроке — загружаем изображение и сохраняем результат
+						auto imageTuple = loadImageFromBinary(binaryPath, start);
+						cv::Mat image;
+						std::string loadedName;
+						size_t fileEndPos = start;
+						bool success;
+						std::tie(image, loadedName, fileEndPos, success) = imageTuple;
+
+						if (!success) {
+							printColoredMessage("Ошибка при загрузке изображения (для сохранения результатов поиска).", CONSOLE_RED);
+							// продолжаем обработку следующих записей, не прерываем весь цикл
+						}
+						else {
+							// сохраняем найденное изображение в папку результатов
+							try {
+								saveImage(
+									image,
+									fs::path(loadedName).filename().string(),
+									fs::path(outputDirectory) / fs::path("search results for " + searchFilename)
+								);
+							}
+							catch (const std::exception& e) {
+								printColoredMessage("Ошибка при сохранении найденного изображения: " + std::string(e.what()), CONSOLE_RED);
+								// не прерываем — продолжаем дальше
+							}
+							catch (...) {
+								printColoredMessage("Неизвестная ошибка при сохранении найденного изображения.", CONSOLE_RED);
+							}
+						}
 					}
-					start = newStart;
 				}
-				catch (const std::exception& e) {
-					printColoredMessage("Ошибка при загрузке изображения: " + std::string(e.what()), CONSOLE_RED);
-					return cv::Mat();
-				}
-				catch (...) {
-					printColoredMessage("Неизвестная Ошибка при загрузке изображения", CONSOLE_RED);
-					return cv::Mat();
-				}
+
+				// Продвигаем start на позицию следующей записи (fileEndPos из метаданных)
+				start = meta.fileEndPos;
 			}
+
+			// ничего не найдено
 			return cv::Mat();
 		}
 		catch (const std::ifstream::failure& e) {
