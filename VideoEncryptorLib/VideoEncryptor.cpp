@@ -64,17 +64,11 @@ void VideoEncryptor::writePartialFile(const std::string& filePath, const std::ve
 }
 
 // xorEncryptDecrypt (обновлённая)
-void VideoEncryptor::xorEncryptDecrypt(std::vector<char>& data, const std::string& key) const
-{
-	if (key.empty() || data.empty()) return;
-
+void VideoEncryptor::xorEncryptDecrypt(char* data, size_t len, const std::string& key, size_t& keyIndex) const {
+	if (key.empty() || len == 0) return;
 	const size_t keyLen = key.size();
 	const char* keyPtr = key.data();
-	size_t keyIndex = 0;
-	const size_t n = data.size();
-
-	// Используем инкремент без оператора % на каждом шаге (быстрее)
-	for (size_t i = 0; i < n; ++i) {
+	for (size_t i = 0; i < len; ++i) {
 		data[i] ^= keyPtr[keyIndex];
 		if (++keyIndex == keyLen) keyIndex = 0;
 	}
@@ -99,11 +93,9 @@ void VideoEncryptor::encryptMp4() const
 				return;
 			}
 
-			// Буфер для первого куска (chunkSize) и большой буфер для копирования остатка
-			const size_t headSize = static_cast<size_t>(chunkSize);
-			std::vector<char> headBuf(headSize);
-			const size_t COPY_BUF_SIZE = 4 * 1024 * 1024; // 4MB — можно увеличить (см. пояснения)
-			std::vector<char> copyBuf(COPY_BUF_SIZE);
+			// Оптимальный буфер: 8 MB (можно менять)
+			const size_t BUFFER_SIZE = 8 * 1024 * 1024;
+			std::vector<char> buffer(BUFFER_SIZE);
 
 			for (const auto& entry : fs::directory_iterator(directoryPath))
 			{
@@ -112,88 +104,69 @@ void VideoEncryptor::encryptMp4() const
 				{
 					if (entry.is_regular_file())
 					{
-						try {
-							std::string encryptingFilePath = entry.path().string();
-							std::cout << "Шифруется " << encryptingFilePath << "..." << std::endl;
-							std::string filename = failedFileName = entry.path().filename().string();
-							std::string encryptedFilePath = (fs::path(encryptedDirectoryPath) / encryptFilename(filename, shift)).string();
+						std::string encryptingFilePath = entry.path().string();
+						std::cout << "Шифруется " << encryptingFilePath << "..." << std::endl;
 
-							// Открываем исходный файл и создаём временный файл назначения
-							std::ifstream src(encryptingFilePath, std::ios::binary);
-							if (!src.is_open()) throw std::runtime_error("Не удалось открыть исходный файл.");
+						std::string filename = failedFileName = entry.path().filename().string();
+						std::string encryptedFilePath = (fs::path(encryptedDirectoryPath) /
+							encryptFilename(filename, shift)).string();
 
-							fs::path tmpPath = fs::path(encryptedFilePath + ".tmp");
-							std::ofstream dst(tmpPath.string(), std::ios::binary | std::ios::trunc);
-							if (!dst.is_open()) {
-								src.close();
-								throw std::runtime_error("Не удалось создать временный файл назначения.");
-							}
+						fs::path tmpPath = fs::path(encryptedFilePath + ".tmp");
 
-							// Читаем первый кусок (head) и шифруем его
-							src.read(headBuf.data(), static_cast<std::streamsize>(headSize));
-							std::streamsize headRead = src.gcount();
-							if (headRead > 0) {
-								headBuf.resize(static_cast<size_t>(headRead));
-								xorEncryptDecrypt(headBuf, key);
-								dst.write(headBuf.data(), headRead);
-								// Восстановим размер буфера для следующего файла
-								headBuf.resize(headSize);
-							}
-							else {
-								// Ничего не прочитали — файл пуст или ошибка чтения
-							}
+						std::ifstream src(encryptingFilePath, std::ios::binary);
+						if (!src.is_open())
+							throw std::runtime_error("Не удалось открыть исходный файл.");
 
-							// Копируем остаток файла блоками (без дополнительного полного копирования)
-							while (src.read(copyBuf.data(), static_cast<std::streamsize>(copyBuf.size())) || src.gcount() > 0) {
-								dst.write(copyBuf.data(), src.gcount());
-							}
+						std::ofstream dst(tmpPath.string(), std::ios::binary | std::ios::trunc);
+						if (!dst.is_open())
+							throw std::runtime_error("Не удалось создать временный файл назначения.");
 
-							dst.close();
-							src.close();
-
-							// Переименуем временный файл в окончательный (атомарно если возможно)
-							fs::rename(tmpPath, encryptedFilePath);
-
-							std::cout << "Файл успешно зашифрован и сохранен как " << encryptedFilePath << std::endl;
-
-							// Удаляем исходный файл, как было в оригинале
-							if (fs::remove(encryptingFilePath)) {
-								std::cout << "Файл " << encryptingFilePath << " удален." << std::endl;
-							}
-							else {
-								std::cerr << "ОШИБКА: Не удалось удалить исходный файл " << filename << std::endl;
-							}
+						// Шифруем весь файл блоками
+						size_t keyIndex = 0; // keep keystream position for the file
+						while (src.read(buffer.data(), static_cast<std::streamsize>(BUFFER_SIZE)) || src.gcount() > 0) {
+							std::streamsize bytesRead = src.gcount();
+							if (bytesRead <= 0) break;
+							xorEncryptDecrypt(buffer.data(), static_cast<size_t>(bytesRead), key, keyIndex);
+							dst.write(buffer.data(), bytesRead);
 						}
-						catch (const fs::filesystem_error& e) {
-							std::cerr << "ОШИБКА файловой системы при обработке файла " << failedFileName << ": " << e.what() << std::endl;
-						}
-						catch (const std::ios_base::failure& e) {
-							std::cerr << "ОШИБКА ввода-вывода при обработке файла " << failedFileName << ": " << e.what() << std::endl;
-						}
-						catch (const std::exception& e) {
-							std::cerr << "ОШИБКА при шифровании видео " << failedFileName << ": " << e.what() << std::endl;
-						}
-						catch (...) {
-							std::cerr << "Неизвестная ошибка при шифровании видео " << failedFileName << std::endl;
-						}
+
+						src.close();
+						dst.close();
+
+						fs::rename(tmpPath, encryptedFilePath);
+
+						std::cout << "Файл успешно зашифрован и сохранен как " << encryptedFilePath << std::endl;
+
+						// Удаляем исходный файл
+						if (fs::remove(encryptingFilePath))
+							std::cout << "Файл " << encryptingFilePath << " удален." << std::endl;
+						else
+							std::cerr << "ОШИБКА: Не удалось удалить исходный файл " << filename << std::endl;
 					}
 				}
-				catch (const std::exception& e)
-				{
-					std::cerr << "ОШИБКА при обработке директории для файла " << failedFileName << ": " << e.what() << std::endl;
+				catch (const fs::filesystem_error& e) {
+					std::cerr << "ОШИБКА файловой системы при обработке файла " << failedFileName
+						<< ": " << e.what() << std::endl;
+				}
+				catch (const std::ios_base::failure& e) {
+					std::cerr << "ОШИБКА ввода-вывода при обработке файла " << failedFileName
+						<< ": " << e.what() << std::endl;
+				}
+				catch (const std::exception& e) {
+					std::cerr << "ОШИБКА при шифровании видео " << failedFileName
+						<< ": " << e.what() << std::endl;
 				}
 				catch (...) {
-					std::cerr << "Неизвестная ошибка при обработке директории для файла " << failedFileName << std::endl;
+					std::cerr << "Неизвестная ошибка при шифровании видео " << failedFileName << std::endl;
 				}
-				std::cout << std::endl << std::endl;
+
+				std::cout << std::endl;
 			}
 		};
 
 	try {
-		// Обработка файлов в основной директории
 		encryptFilesInDirectory((fs::path(baseDirectory) / inputFolder).string());
 
-		// Обработка файлов в директории, куда восстанавливаются файлы
 		if (VideoEncryptor::shouldEncryptDecryptedFolder) {
 			encryptFilesInDirectory((fs::path(baseDirectory) / decryptedFolder).string());
 		}
@@ -218,11 +191,8 @@ void VideoEncryptor::decryptMp4() const {
 	}
 
 	const std::string encryptedDirectoryPath = (fs::path(baseDirectory) / encryptedFolder).string();
-
-	// Основной буфер для зашифрованных данных (первый кусок)
-	std::vector<char> firstChunk(chunkSize);
-	// Крупный буфер для потокового копирования
-	std::vector<char> copyBuf(8 * 1024 * 1024); // 4 MB — можно менять (см. пояснение ниже)
+	const size_t BUFFER_SIZE = 8 * 1024 * 1024;
+	std::vector<char> buffer(BUFFER_SIZE);
 
 	for (const auto& entry : fs::directory_iterator(encryptedDirectoryPath)) {
 		if (!entry.is_regular_file()) continue;
@@ -247,15 +217,12 @@ void VideoEncryptor::decryptMp4() const {
 				continue;
 			}
 
-			// Читаем и расшифровываем первый кусок
-			in.read(firstChunk.data(), chunkSize);
-			std::streamsize bytesRead = in.gcount();
-			xorEncryptDecrypt(firstChunk, key);
-			out.write(firstChunk.data(), bytesRead);
-
-			// Копируем оставшуюся часть файла блоками
-			while (in.read(copyBuf.data(), copyBuf.size()) || in.gcount() > 0) {
-				out.write(copyBuf.data(), in.gcount());
+			size_t keyIndex = 0; // IMPORTANT: one keystream position per file
+			while (in.read(buffer.data(), static_cast<std::streamsize>(BUFFER_SIZE)) || in.gcount() > 0) {
+				std::streamsize got = in.gcount();
+				if (got <= 0) break;
+				xorEncryptDecrypt(buffer.data(), static_cast<size_t>(got), key, keyIndex);
+				out.write(buffer.data(), got);
 			}
 
 			std::cout << "Файл сохранён как: " << decryptedFilePath << std::endl;

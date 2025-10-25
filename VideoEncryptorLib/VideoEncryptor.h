@@ -59,11 +59,11 @@ private:
 
 	bool shouldEncryptDecryptedFolder;
 	bool deleteDecryptedFiles;
-	
+
 	std::string encryptFilename(const std::string& filename, short shift = 1, short maxShift = 10) const;
 	std::vector<char> readPartialFile(const std::string& filePath, std::streamsize size) const;
 	void writePartialFile(const std::string& filePath, const std::vector<char>& data, std::streampos pos) const;
-	void xorEncryptDecrypt(std::vector<char>& data, const std::string& key) const;
+	void xorEncryptDecrypt(char* data, size_t len, const std::string& key, size_t& keyIndex) const;
 };
 
 
